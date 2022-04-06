@@ -1,0 +1,55 @@
+<html>
+<body>
+<script type="module">
+  import { expect } from "@open-wc/testing";
+  import { runTests } from "@web/test-runner-mocha";
+  import ResourceManager from '../src/ResourceManager.js';
+
+  runTests(async () => {
+    describe('ResourceManager', () => {
+      it('should load image file by url', async () => {
+        const FILENAME = 'images/test.webp';
+        const manager = new ResourceManager();
+        const promise = manager.loadImageByUrl(FILENAME);
+
+        expect(manager.get(FILENAME).outerHTML).to.equal('<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==">');
+
+        const image = await promise;
+        expect(manager.get(FILENAME)).to.equal(image);
+        expect(image.outerHTML).to.equal('<img src="assets/images/test.webp">');
+      });
+
+      it('should load audio file by url', async () => {
+        const FILENAME = 'audio/freejazz.wav';
+        const manager = new ResourceManager();
+        const promise = manager.loadAudioByUrl(FILENAME);
+
+        expect(manager.get(FILENAME)).to.equal(null);
+
+        const audio = await promise;
+        expect(manager.get(FILENAME).length).to.equal(201532);
+      });
+
+      it('should load json file by url', async () => {
+        const FILENAME = 'test.json';
+        const manager = new ResourceManager();
+        await manager.loadJsonByUrl(FILENAME);
+
+        expect(manager.get(FILENAME)).to.deep.equal({ success: true });
+      });
+
+      it('should load batch files by urls', async () => {
+        const manager = new ResourceManager();
+        const [image, audio, json] = await manager.loadBatch([
+          'images/test.webp',
+          'audio/freejazz.wav',
+          'test.json'
+        ]);
+
+        expect(json).to.deep.equal({ success: true });
+      });
+    });
+  });
+</script>
+</body>
+</html>
