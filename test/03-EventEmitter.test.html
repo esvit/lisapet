@@ -1,0 +1,40 @@
+<html>
+<body>
+<script type="module">
+  import { expect } from "@open-wc/testing";
+  import { runTests } from "@web/test-runner-mocha";
+  import EventEmitter from '../src/EventEmitter.js';
+
+  class Test extends EventEmitter {
+    testOn() {
+      this.emit('test');
+    }
+
+    testOnce() {
+      this.emit('test2');
+    }
+  }
+
+  runTests(async () => {
+    describe('EventEmitter', () => {
+      it('should bind, unbind and emit events', () => {
+        const func = function() { throw new Error('It works!'); };
+
+        const test = new Test();
+
+        test.on('test', func);
+        test.once('test2', func);
+
+        expect(() => { test.testOn(); }).to.throw('It works!');
+        expect(() => { test.testOn(); }).to.throw('It works!');
+        expect(() => { test.testOnce(); }).to.throw('It works!');
+        expect(() => { test.testOnce(); }).to.not.throw('It works!');
+
+        test.off('test', func);
+        expect(() => { test.testOn(); }).to.not.throw('It works!');
+      });
+    });
+  });
+</script>
+</body>
+</html>

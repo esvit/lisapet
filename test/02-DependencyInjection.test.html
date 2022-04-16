@@ -1,0 +1,41 @@
+<html>
+<body>
+<script type="module">
+  import { expect } from "@open-wc/testing";
+  import { runTests } from "@web/test-runner-mocha";
+  import DependencyInjection from '../src/DependencyInjection.js';
+
+  class A {
+    constructor({ B }) { console.info('B', B); }
+  }
+
+  class B {
+    constructor({ C }) { console.info('C', C); }
+  }
+
+  class C {
+    constructor({ A }) { console.info('A', A); }
+  }
+
+  class Test {
+  }
+
+  runTests(async () => {
+    describe('DependencyInjection', () => {
+      it('should create root with di', () => {
+        const di = DependencyInjection.createRoot({ Test });
+
+        expect(di.get('di')).to.be.instanceOf(DependencyInjection);
+        expect(di.get('Test')).to.be.instanceOf(Test);
+      });
+
+      it('should find circular dependencies', () => {
+        const di = DependencyInjection.createRoot({ A, B, C });
+
+        expect(function () { di.get(A) }).to.throw('Circular dependency found A -> B -> C -> A');
+      });
+    });
+  });
+</script>
+</body>
+</html>

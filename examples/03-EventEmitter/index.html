@@ -1,0 +1,45 @@
+<html>
+<head><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous"></head>
+<body class="p-5">
+
+<button class="btn btn-secondary" id="on">On</button>
+<button class="btn btn-secondary" id="once">Once</button>
+
+<script type="module">
+  import EventEmitter from '../../src/EventEmitter.js';
+
+  class A extends EventEmitter {
+    testOn() {
+      this.emit('test');
+    }
+
+    testOnce() {
+      this.emit('test2');
+    }
+  }
+
+  async function bootstrap() {
+    const a = new A();
+
+    a.on('test', () => {
+      alert('On');
+    });
+    a.once('test2', () => {
+      alert('Once');
+    });
+
+    el('on').addEventListener('click', () => {
+      a.testOn();
+    });
+    el('once').addEventListener('click', () => {
+      a.testOnce();
+    });
+
+    function el(id) {
+      return document.getElementById(id);
+    }
+  }
+  bootstrap();
+</script>
+</body>
+</html>
