@@ -1,5 +1,7 @@
 import EventEmitter from './EventEmitter.mjs';
 
+const EMITTER_FUNCS = Object.getOwnPropertyNames(EventEmitter.prototype);
+
 export default
 class State extends EventEmitter {
   #localState = null;
@@ -33,6 +35,9 @@ class State extends EventEmitter {
           throw new Error(`State has variable and mutation with the same name ${key}`);
         }
         if (action) {
+          if (EMITTER_FUNCS.includes(key)) {
+            return (...args) => action.apply(object, args);
+          }
           return (...args) => action.apply(object, [mapMutations(object.mutations, { state, emit: object.emit.bind(object) }), ...args])
         }
         if (mutation) {
