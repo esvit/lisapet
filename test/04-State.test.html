@@ -40,6 +40,15 @@
 
         expect(() => { gameState.test = 2; }).to.throw('Property test is readonly');
       });
+
+      it('should emit events', async () => {
+        const gameState = new GameState();
+
+        gameState.on('test', (val) => {
+          expect(val).to.equal(1);
+        });
+        gameState.emit('test', 1)
+      });
     });
   });
 </script>

@@ -37,7 +37,7 @@ class GameScene extends Scene {
       [CELL_X]: soundX,
       [CELL_O]: soundO,
     };
-    this.gameState.on('turn', (e, side) => {
+    this.gameState.on('turn', (side) => {
       this.audios[side].play()
     });
     this.resume();
@@ -106,7 +106,7 @@ class GameScene extends Scene {
     }
   }
 
-  click(e, { x, y }) {
+  click({ x, y }) {
     const cellIndex = Math.ceil(x / CELL_SIZE);
     const rowIndex = Math.ceil(y / CELL_SIZE);
     const { map, isActiveGame, turnKey, gameId } = this.gameState;

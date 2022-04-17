@@ -7,7 +7,7 @@ class EventEmitter {
       return;
     }
     for (const func of this.#events[eventName]) {
-      func.apply(this, [eventName, ...args]);
+      func.apply(this, args);
     }
   }
 

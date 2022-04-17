@@ -29,7 +29,7 @@ class MenuScene extends Scene {
     this.inputManager.on('click', this.click.bind(this));
   }
 
-  move(e, { x, y }) {
+  move({ x, y }) {
     for (const element of this.elements) {
       if (x >= element.x && y >= element.y && x <= element.x + element.width && y <= element.y + element.height) {
         element.state = 1;
@@ -39,7 +39,7 @@ class MenuScene extends Scene {
     }
   }
 
-  click(e, { x, y }) {
+  click({ x, y }) {
     for (const element of this.elements) {
       if (x >= element.x && y >= element.y && x <= element.x + element.width && y <= element.y + element.height) {
         element.click();
