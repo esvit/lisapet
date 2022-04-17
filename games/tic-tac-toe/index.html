@@ -28,6 +28,7 @@
   import DrawingContext from '/src/DrawingContext.mjs';
   import InputManager from '/src/InputManager.mjs';
   import MenuScene from './src/client/scenes/MenuScene.mjs';
+  import GameScene from './src/client/scenes/GameScene.mjs';
   import GameState from './src/shared/GameState.mjs';
 
   async function bootstrap() {
@@ -35,15 +36,21 @@
       ResourceManager,
       DrawingContext,
       InputManager,
-      GameState
+      GameState,
+      MenuScene,
+      GameScene
     });
     di.set('canvas', document.getElementById('main'));
 
     const sceneManager = di.get(SceneManager);
-    const menuScene = di.get(MenuScene);
     const drawingContext = di.get(DrawingContext);
 
-    sceneManager.loadScene(menuScene);
+    const url = new URL(window.location);
+    if (url.searchParams.has('gameId')) {
+      sceneManager.loadScene(GameScene);
+    } else {
+      sceneManager.loadScene(MenuScene);
+    }
 
     drawingContext.loop();
   }

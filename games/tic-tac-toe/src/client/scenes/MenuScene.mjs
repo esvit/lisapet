@@ -17,7 +17,14 @@ class MenuScene extends Scene {
     this.resourceManager = ResourceManager;
     this.drawingContext = DrawingContext;
     this.inputManager = InputManager;
+  }
 
+  pause() {
+    this.inputManager.off('move');
+    this.inputManager.off('click');
+  }
+
+  resume() {
     this.inputManager.on('move', this.move.bind(this));
     this.inputManager.on('click', this.click.bind(this));
   }
@@ -54,8 +61,7 @@ class MenuScene extends Scene {
         height: 50,
         text: 'Проти компʼютеру',
         click: () => {
-          const scene = this.di.get(GameScene);
-          this.sceneManager.loadScene(scene);
+          this.sceneManager.loadScene(GameScene, { withAI: true });
           clickSound.play();
         }
       }),
@@ -66,10 +72,13 @@ class MenuScene extends Scene {
         height: 50,
         text: 'Проти гравця',
         click: () => {
+          this.sceneManager.loadScene(GameScene, { withAI: false });
           clickSound.play();
         }
       })
     ];
+
+    this.resume();
   }
 
   draw() {

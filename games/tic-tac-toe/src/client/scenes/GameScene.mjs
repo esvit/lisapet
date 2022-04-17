@@ -13,18 +13,20 @@ const SERVER_URL = 'http://localhost:8080';
 
 export default
 class GameScene extends Scene {
-  constructor({ DrawingContext, ResourceManager, InputManager, GameState }) {
+  constructor({ DrawingContext, ResourceManager, InputManager, GameState, SceneManager }) {
     super();
 
+    this.sceneManager = SceneManager;
     this.drawingContext = DrawingContext;
     this.resourceManager = ResourceManager;
     this.inputManager = InputManager;
     this.gameState = GameState;
-
-    this.inputManager.on('click', this.click.bind(this));
   }
 
   async loading() {
+    this.userId = localStorage.getItem('userId') || `user${Math.random()}`;
+    localStorage.setItem('userId', this.userId);
+
     const [soundX, soundO] = await this.resourceManager.loadBatch([
       ASSET_SOUND_X,
       ASSET_SOUND_O,
@@ -37,11 +39,20 @@ class GameScene extends Scene {
     };
     this.gameState.on('turn', (side) => {
       this.audios[side].play()
-    })
+    });
+    this.resume();
   }
 
-  start() {
-    this.gameState.connectToServer(SERVER_URL);
+  pause() {
+    this.inputManager.off('click');
+  }
+
+  resume() {
+    this.inputManager.on('click', this.click.bind(this));
+  }
+
+  start({ withAI } = { withAI: true }) {
+    this.gameState.connectToServer(SERVER_URL, this.userId, withAI);
   }
 
   draw() {
@@ -98,8 +109,9 @@ class GameScene extends Scene {
   click(e, { x, y }) {
     const cellIndex = Math.ceil(x / CELL_SIZE);
     const rowIndex = Math.ceil(y / CELL_SIZE);
-    const { map, isActiveGame, turnKey, gameId, side } = this.gameState;
+    const { map, isActiveGame, turnKey, gameId } = this.gameState;
     if (!isActiveGame) {
+      this.sceneManager.loadScene('MenuScene')
       return;
     }
     if (cellIndex > 3 || rowIndex > 3) {

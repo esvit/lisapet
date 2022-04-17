@@ -1,6 +1,8 @@
 import State from '../../../../src/State.mjs';
 import { CELL_X, CELL_EMPTY, CELL_O } from './constants.mjs';
 
+let eventSource = null;
+
 export default
 class GameState extends State {
   get state() {
@@ -43,6 +45,7 @@ class GameState extends State {
 
   win({ setWonSide }, side) {
     setWonSide(side);
+    eventSource && eventSource.close();
   }
 
   fillCell({ state, setTurnKey }, x, y) {
@@ -56,13 +59,14 @@ class GameState extends State {
     setTurnKey(`key${Math.random()}`);
   }
 
-  connectToServer({ state, emit, setGameId, setMap, setGameParams }, serverUrl) {
+  connectToServer({ state, emit, setGameId, setMap, setGameParams }, serverUrl, userId, withAI = false) {
     const url = new URL(window.location);
+    serverUrl += `/?userId=${userId}&ai=${withAI ? '1' : '0'}`;
     if (url.searchParams.has('gameId')) {
-      serverUrl += `/?gameId=${url.searchParams.get('gameId')}`;
+      serverUrl += `&gameId=${url.searchParams.get('gameId')}`;
     }
-    const source = new EventSource(serverUrl);
-    source.onmessage = ({ lastEventId, data }) => {
+    eventSource = new EventSource(serverUrl);
+    eventSource.onmessage = ({ lastEventId, data }) => {
       if (!state.gameId) {
         url.searchParams.set('gameId', lastEventId);
         window.history.pushState({ gameId: lastEventId }, '', url);

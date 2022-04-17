@@ -1,4 +1,5 @@
 import http from 'http';
+import url from 'url';
 import Game from './Game.mjs';
 
 let games = [];
@@ -21,14 +22,14 @@ http.createServer(async(req, res) => {
     res.end();
   } else {
     res.setHeader('Content-Type', 'text/event-stream');
-
-    const match = req.url.match(/\?gameId=(.*)/);
-
-    let game = match && games.find((g) => g.id === match[1]);
+    const { gameId, userId, ai } = url.parse(req.url, true).query;
+    let game = games.find((g) => g.id === gameId);
+    let isNewGame = false;
     if (!game) {
+      isNewGame = true;
       game = new Game();
     }
-    game.join((statusFor) => {
+    game.join(userId, (statusFor) => {
       const status = game.getStatus(statusFor);
       res.write(`id:${game.id}\n`);
       res.write(`data:${JSON.stringify(status)}\n\n`);
@@ -36,6 +37,10 @@ http.createServer(async(req, res) => {
         games = games.filter((g) => g.id !== game.id);
       }
     });
+    if (isNewGame && ai === '1') {
+      console.info('join ai')
+      game.joinAI();
+    }
     games.push(game);
     console.info('Games:', games.length);
   }

@@ -37,17 +37,19 @@ class Game {
     return this.gameState.turnKey;
   }
 
-  join(callback) {
-    // if (this.players[CELL_X]) {
-    //   this.players[CELL_O] = callback;
-    //   callback(CELL_O);
-    // } else {
-    this.players[CELL_X] = callback;
-    callback(CELL_X);
+  join(userId, callback) {
+    if (this.players[CELL_X] && this.players[CELL_X].userId !== userId) {
+      this.players[CELL_O] = { callback, userId };
+      callback(CELL_O);
+    } else {
+      this.players[CELL_X] = { callback, userId };
+      callback(CELL_X);
+    }
+  }
 
+  joinAI() {
     const ai = new AIPlayer(this, this.gameState);
-    this.players[CELL_O] = ai.callback.bind(ai);
-    // }
+    this.players[CELL_O] = { callback: ai.callback.bind(ai), id: 'ai' };
   }
 
   getStatus(statusFor) {
@@ -63,10 +65,10 @@ class Game {
 
   sendStatus() {
     if (this.players[CELL_X]) {
-      this.players[CELL_X](CELL_X);
+      this.players[CELL_X].callback(CELL_X);
     }
     if (this.players[CELL_O]) {
-      this.players[CELL_O](CELL_O);
+      this.players[CELL_O].callback(CELL_O);
     }
   }
 
