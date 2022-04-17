@@ -21,7 +21,7 @@ class DependencyInjection {
   constructor(scope = null, parent = null) {
     this.#parent = parent;
 
-    this.#scope = scope || globalScope;
+    this.#scope = (scope || globalScope || {});
 
     this.#proxy = new Proxy({}, {
       get: (target, name) => this.get(name),

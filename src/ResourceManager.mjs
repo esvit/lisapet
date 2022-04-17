@@ -4,8 +4,8 @@ export default
 class ResourceManager {
   #resources = {};
 
-  constructor({ assetsPath } = {}) {
-    this.assetsPath = assetsPath || RESOURCE_PATH;
+  constructor() {
+    this.assetsPath = RESOURCE_PATH;
     this.emptyImage = new Image();
     this.emptyImage.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
   }
@@ -65,6 +65,13 @@ class ResourceManager {
 
       const audioCtx = new AudioContext();
       audioCtx.decodeAudioData(undecodedAudio, (data) => {
+        data.play = () => {
+          const audioCtx = new AudioContext();
+          const source = audioCtx.createBufferSource();
+          source.buffer = data;
+          source.connect(audioCtx.destination);
+          source.start(0);
+        }
         this.#resources[name] = data;
         resolve(this.#resources[name]);
       });

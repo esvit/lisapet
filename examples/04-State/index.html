@@ -3,7 +3,13 @@
 <body class="p-5">
 
 <script type="module">
-  import State from '../../src/State.js';
+  import State from '../../src/State.mjs';
+
+  function wait(t) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, t);
+    });
+  }
 
   class GameState extends State {
     get state() {
@@ -18,7 +24,9 @@
       };
     }
 
-    loadState({ changeTest }, val) {
+    async loadState({ changeTest }, val) {
+      await wait(5000);
+
       changeTest(val);
     }
   }
@@ -31,7 +39,7 @@
     console.info(gameState.test);
     gameState.changeTest(3);
     console.info(gameState.test);
-    gameState.loadState(4);
+    await gameState.loadState(4);
     console.info(gameState.test);
   }
   bootstrap();

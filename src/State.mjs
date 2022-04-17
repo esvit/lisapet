@@ -1,5 +1,7 @@
+import EventEmitter from './EventEmitter.mjs';
+
 export default
-class State {
+class State extends EventEmitter {
   #localState = null;
 
   get state() {
@@ -18,28 +20,30 @@ class State {
   }
 
   constructor() {
+    super();
+
     return new Proxy(this, {
       get(object, key) {
         const state = object.getState();
         const value = state[key];
         const mutation = object.mutations[key];
-        const action = object[key];
+        const action = typeof object[key] === 'function' ? object[key] : null;
 
         if ((value && mutation) || (value && action) || (mutation && action)) {
-          throw new Error('State has variable and mutation with the same name');
+          throw new Error(`State has variable and mutation with the same name ${key}`);
         }
         if (action) {
-          return (...args) => action.apply(object, [mapMutations(object.mutations, { state }), ...args])
+          return (...args) => action.apply(object, [mapMutations(object.mutations, { state, emit: object.emit.bind(object) }), ...args])
         }
         if (mutation) {
-          return (...args) => mutation.apply(object, [{ state }, ...args])
+          return (...args) => mutation.apply(object, [{ state, emit: object.emit.bind(object) }, ...args])
         }
         return value;
 
         function mapMutations(mutations, ctx) {
           let mutationsCache = mutations.__cache;
           if (!mutationsCache) {
-            mutationsCache = {};
+            mutationsCache = { ...ctx };
             const keys = Object.keys(mutations);
             for (const name of keys) {
               const mutation = mutations[name];
@@ -50,12 +54,8 @@ class State {
           return mutationsCache;
         }
       },
-      set(object, key, value, proxy) {
-        const state = object.getState();
-        if (state[key] !== value) {
-          state[key] = value;
-        }
-        return true;
+      set(object, key) {
+        throw new Error(`Property ${key} is readonly`);
       }
     })
   }

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Tic Tac Toe</title>
+  <style>
+      body {
+          padding: 0;
+          margin: 0;
+      }
+      #main {
+          width: 100vw;
+          height: 100vh;
+      }
+  </style>
+</head>
+<body>
+
+<canvas id="main"></canvas>
+
+<script type="module">
+  import DependencyInjection from '/src/DependencyInjection.mjs';
+  import SceneManager from '/src/SceneManager.mjs';
+  import ResourceManager from '/src/ResourceManager.mjs';
+  import DrawingContext from '/src/DrawingContext.mjs';
+  import InputManager from '/src/InputManager.mjs';
+  import MenuScene from './src/client/scenes/MenuScene.mjs';
+  import GameState from './src/shared/GameState.mjs';
+
+  async function bootstrap() {
+    const di = DependencyInjection.createRoot({
+      ResourceManager,
+      DrawingContext,
+      InputManager,
+      GameState
+    });
+    di.set('canvas', document.getElementById('main'));
+
+    const sceneManager = di.get(SceneManager);
+    const menuScene = di.get(MenuScene);
+    const drawingContext = di.get(DrawingContext);
+
+    sceneManager.loadScene(menuScene);
+
+    drawingContext.loop();
+  }
+  bootstrap();
+
+</script>
+</body>
+</html>
