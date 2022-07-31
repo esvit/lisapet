@@ -4,11 +4,14 @@ const FPS_UPDATE_TIME = 1;
 
 export default
 class DrawingContext extends EventEmitter {
+  #camera = null;
+
   constructor({ canvas }) {
     super();
 
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
+    this.ctx.imageSmoothingEnabled = false;
 
     this.timeMeasurements = [];
     this.fps = 0;
@@ -31,6 +34,18 @@ class DrawingContext extends EventEmitter {
 
   get height() {
     return this.canvas.height;
+  }
+
+  get cameraBox() {
+    return this.#camera ? this.#camera.box : [0, 0, 0, 0];
+  }
+
+  get camera() {
+    return this.#camera;
+  }
+
+  set camera(val) {
+    this.#camera = val;
   }
 
   drawFps() {
@@ -73,7 +88,11 @@ class DrawingContext extends EventEmitter {
     this.ctx.fillRect(x, y, width, height);
   }
 
-  lines(lines, strokeStyle = 'red') {
+  lines(lines, strokeStyle = 'red', angle = 0) {
+    const [cx, cy] = this.cameraBox;
+
+    this.ctx.save();
+    this.ctx.translate(-cx, -cy);
     this.ctx.strokeStyle = strokeStyle;
     this.ctx.beginPath();
     for (const line of lines) {
@@ -81,6 +100,7 @@ class DrawingContext extends EventEmitter {
       this.ctx.lineTo(line.x2, line.y2);
     }
     this.ctx.stroke();
+    this.ctx.restore();
   }
 
   drawImage(image, x, y, width, height) {

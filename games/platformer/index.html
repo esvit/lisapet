@@ -5,7 +5,24 @@
   <meta name="viewport"
         content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Tic Tac Toe</title>
+  <style>
+      * {
+          -webkit-touch-callout: none;
+          -webkit-user-select: none;
+          -khtml-user-select: none;
+          -moz-user-select: none;
+          -ms-user-select: none;
+          user-select: none;
+      }
+      body {
+          padding: 0;
+          margin: 0;
+          background: #000;
+          overflow: hidden;
+          position: relative;
+          min-height: 100vh;
+      }
+  </style>
 </head>
 <body>
 
@@ -17,9 +34,8 @@
   import ResourceManager from '/src/ResourceManager.mjs';
   import DrawingContext from '/src/DrawingContext.mjs';
   import InputManager from '/src/InputManager.mjs';
-  import MenuScene from './src/client/scenes/MenuScene.mjs';
-  import GameScene from './src/client/scenes/GameScene.mjs';
-  import GameState from './src/shared/GameState.mjs';
+  import GameScene from './src/scenes/GameScene.mjs';
+  import GameState from './src/GameState.mjs';
 
   async function bootstrap() {
     const di = DependencyInjection.createRoot({
@@ -27,7 +43,6 @@
       DrawingContext,
       InputManager,
       GameState,
-      MenuScene,
       GameScene
     });
     di.set('canvas', document.getElementById('main'));
@@ -35,17 +50,11 @@
     const sceneManager = di.get(SceneManager);
     const drawingContext = di.get(DrawingContext);
 
-    const url = new URL(window.location);
-    if (url.searchParams.has('gameId')) {
-      sceneManager.loadScene(GameScene);
-    } else {
-      sceneManager.loadScene(MenuScene);
-    }
+    sceneManager.loadScene(GameScene);
 
-    // drawingContext.loop();
+    drawingContext.loop();
   }
   bootstrap();
-
 </script>
 </body>
 </html>

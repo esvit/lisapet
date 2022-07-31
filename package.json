@@ -4,7 +4,7 @@
   "description": "JS game engine",
   "main": "index.html",
   "scripts": {
-    "start": "http-server",
+    "start": "http-server -c-1",
     "test": "web-test-runner test/**/*.test.* --node-resolve"
   },
   "repository": {

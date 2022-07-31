@@ -2,7 +2,7 @@ const RESOURCE_PATH = 'assets';
 
 export default
 class ResourceManager {
-  #resources = {};
+  resources = {};
 
   constructor() {
     this.assetsPath = RESOURCE_PATH;
@@ -37,27 +37,27 @@ class ResourceManager {
   }
 
   loadImageByUrl(name) {
-    this.#resources[name] = this.emptyImage;
+    this.resources[name] = this.emptyImage;
 
     return new Promise((resolve) => {
       const img = new Image();
       img.src = `${this.assetsPath}/${name}`;
       img.onload = () => {
-        this.#resources[name] = img;
+        this.resources[name] = img;
         resolve(img);
       };
     });
   }
 
   async loadJsonByUrl(file) {
-    this.#resources[file] = {};
+    this.resources[file] = {};
     const res = await fetch(`${this.assetsPath}/${file}`);
-    this.#resources[file] = await res.json();
-    return this.#resources[file];
+    this.resources[file] = await res.json();
+    return this.resources[file];
   }
 
   loadAudioByUrl(name) {
-    this.#resources[name] = null;
+    this.resources[name] = null;
 
     return new Promise(async (resolve) => {
       const resp = await fetch(`${this.assetsPath}/${name}`);
@@ -72,13 +72,13 @@ class ResourceManager {
           source.connect(audioCtx.destination);
           source.start(0);
         }
-        this.#resources[name] = data;
-        resolve(this.#resources[name]);
+        this.resources[name] = data;
+        resolve(this.resources[name]);
       });
     });
   }
 
   get(name) {
-    return this.#resources[name];
+    return this.resources[name];
   }
 }

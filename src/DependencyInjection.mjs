@@ -33,20 +33,20 @@ class DependencyInjection {
     this.#instances[name] = value;
   }
 
-  get(nameOrClass) {
+  get(nameOrClass, ...args) {
     const className = typeof nameOrClass === 'string' ? nameOrClass : nameOrClass.prototype.constructor.name;
     if (this.#instances[className]) {
       return this.#instances[className];
     }
     if (this.#parent) {
-      return this.#parent.get(nameOrClass);
+      return this.#parent.get(nameOrClass, ...args);
     }
     const clsConstr = typeof nameOrClass === 'string' ? (this.#scope[nameOrClass] || eval(nameOrClass)) : nameOrClass;
     if (this.#stack.find((fn) => fn === className)) {
       throw new Error(`Circular dependency found ${this.#stack.join(' -> ')} -> ${className}`);
     }
     this.#stack.push(className);
-    this.#instances[className] = new clsConstr(this.#proxy);
+    this.#instances[className] = new clsConstr(this.#proxy, ...args);
     this.#stack.pop();
     return this.#instances[className];
   }

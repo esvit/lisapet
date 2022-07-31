@@ -1,5 +1,9 @@
 import State from '../../../../src/State.mjs';
-import { CELL_X, CELL_EMPTY, CELL_O } from './constants.mjs';
+
+export const CELL_EMPTY = 0;
+export const CELL_X = 1;
+export const CELL_O = 2;
+export const CELL_TIE = 3;
 
 let eventSource = null;
 
