@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <style>
+        * {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        body {
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+            position: relative;
+            min-height: 100vh;
+        }
+        #main {
+            width: 100vw;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="main"></canvas>
+
+<script type="module">
+    import MapReader from './src/MapReader.mjs';
+
+    async function bootstrap() {
+        const dropZone = document.getElementById('main');
+        dropZone.addEventListener('dragover', function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+        });
+        dropZone.addEventListener('drop', function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            const [file] = e.dataTransfer.files;
+
+            const reader = new FileReader();
+
+            reader.onload = function({ target }) {
+                const map = new MapReader(target.result);
+                console.info(map);
+            }
+            reader.readAsBinaryString(file);
+        });
+    }
+    bootstrap();
+</script>
+</body>
+</html>
