@@ -15,9 +15,11 @@ class DrawingContext extends EventEmitter {
 
     this.timeMeasurements = [];
     this.fps = 0;
+  }
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+  bindToWindow() {
+    this.canvas.width = window.innerWidth;
+    this.canvas.height = window.innerHeight;
 
     window.addEventListener('orientationchange', this.#onResize.bind(this));
     window.addEventListener('resize', this.#onResize.bind(this));

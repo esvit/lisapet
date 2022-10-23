@@ -4,6 +4,8 @@ export default
 class ResourceManager {
   resources = {};
 
+  atlases = {};
+
   constructor() {
     this.assetsPath = RESOURCE_PATH;
     this.emptyImage = new Image();
@@ -18,6 +20,9 @@ class ResourceManager {
         continue;
       }
       switch (match[0]) { // file extension
+        case '.atlas':
+          promises.push(this.loadAtlasByUrl(name));
+          break;
         case '.json':
           promises.push(this.loadJsonByUrl(name));
           break;
@@ -39,14 +44,28 @@ class ResourceManager {
   loadImageByUrl(name) {
     this.resources[name] = this.emptyImage;
 
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const img = new Image();
       img.src = `${this.assetsPath}/${name}`;
+      img.onerror = reject;
       img.onload = () => {
         this.resources[name] = img;
         resolve(img);
       };
     });
+  }
+
+  async loadAtlasByUrl(file) {
+    this.resources[file] = {};
+    const res = await fetch(`${this.assetsPath}/${file}`);
+    const { texture, frames } = await res.json();
+    if (!texture) {
+      throw new Error(`Texture not found in atlas ${file}`);
+    }
+    this.resources[file] = res;
+    this.atlases[file] = { texture, frames };
+    await this.loadImageByUrl(texture);
+    return this.resources[file];
   }
 
   async loadJsonByUrl(file) {
@@ -80,5 +99,15 @@ class ResourceManager {
 
   get(name) {
     return this.resources[name];
+  }
+
+  getByAtlas(name) {
+    for (const atlasFile in this.atlases) {
+      const { texture, frames } = this.atlases[atlasFile];
+      if (frames[name]) {
+        return [this.get(texture), ...frames[name]];
+      }
+    }
+    return null;
   }
 }

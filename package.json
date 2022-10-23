@@ -28,5 +28,28 @@
     "@web/test-runner-mocha": "^0.7.5",
     "http-server": "^14.1.0",
     "jest": "^27.5.1"
+  },
+  "jest": {
+    "testPathIgnorePatterns": [
+      "dist/",
+      "node_modules/"
+    ],
+    "modulePathIgnorePatterns": [
+      "dist/",
+      "node_modules/"
+    ],
+    "collectCoverage": true,
+    "coverageReporters": [
+      "html"
+    ],
+    "testMatch": [
+      "**/*.test.mjs"
+    ],
+    "globals": {
+      "window": {}
+    }
+  },
+  "dependencies": {
+    "ffmpeg": "0.0.4"
   }
 }

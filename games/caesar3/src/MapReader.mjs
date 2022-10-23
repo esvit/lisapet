@@ -1,3 +1,5 @@
+import { MAP_SIZE_AND_BORDER } from './constants.mjs';
+
 function readType(size, isString = false) {
     return function(length = 1, bigEndian = false) {
         return function (buffer, offset = 0) {
@@ -50,21 +52,21 @@ export const STRUCT_TYPES = {
 
 const MAP_STRUCT = {
     // 0x0	52488	Short grid, graphic IDs. Each ID corresponds to a different graphic element / building
-    tileId: STRUCT_TYPES.short(26244),
+    tileId: STRUCT_TYPES.short(MAP_SIZE_AND_BORDER * MAP_SIZE_AND_BORDER),
     // 0xcd08	26244	Byte grid, edge data
-    edgeData: STRUCT_TYPES.byte(26244),
+    edgeData: STRUCT_TYPES.byte(MAP_SIZE_AND_BORDER * MAP_SIZE_AND_BORDER),
 
     // 0x1338c	52488	Short grid, terrain data
-    terrainInfo: STRUCT_TYPES.short(26244),
+    terrainInfo: STRUCT_TYPES.short(MAP_SIZE_AND_BORDER * MAP_SIZE_AND_BORDER),
 
     // 0x20094	26244	Byte grid, related to "randomness" in terrain. 00 or 20 (hex), 01 or 21 for 2x2 buildings, etc
-    minimapInfo: STRUCT_TYPES.byte(26244),
+    minimapInfo: STRUCT_TYPES.byte(MAP_SIZE_AND_BORDER * MAP_SIZE_AND_BORDER),
 
     // 0x26718	26244	Byte grid, random numbers used for, among others: merging houses, tile appearance, minimap colours
-    randomNumbers: STRUCT_TYPES.byte(26244),
+    randomNumbers: STRUCT_TYPES.byte(MAP_SIZE_AND_BORDER * MAP_SIZE_AND_BORDER),
 
     // 0x2cd9c	26244	Byte grid, indicates the elevation level: 0 for the "ground" level, 1 for the first elevation level, 2 for the second, and so on
-    heightInfo: STRUCT_TYPES.byte(26244),
+    heightInfo: STRUCT_TYPES.byte(MAP_SIZE_AND_BORDER * MAP_SIZE_AND_BORDER),
 
     // 0x33420  8    ????
     _u0: STRUCT_TYPES.byte(8),

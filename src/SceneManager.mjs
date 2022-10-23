@@ -26,6 +26,7 @@ class SceneManager {
     this.#currentScene = scene;
 
     await scene.start.apply(scene, args);
+    return scene;
   }
 
   drawScene() {

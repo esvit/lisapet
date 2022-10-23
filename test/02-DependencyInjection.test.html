@@ -34,6 +34,12 @@
 
         expect(function () { di.get(A) }).to.throw('Circular dependency found A -> B -> C -> A');
       });
+
+      it('should find circular dependencies', () => {
+        const di = DependencyInjection.createRoot({ A, B, C });
+
+        expect(function () { di.get(A) }).to.throw('Circular dependency found A -> B -> C -> A');
+      });
     });
   });
 </script>
