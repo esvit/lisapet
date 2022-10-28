@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <style>
+        * {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        body {
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+            position: relative;
+            min-height: 100vh;
+        }
+    </style>
+    <link rel="stylesheet" href="assets/css/ui.css">
+</head>
+<body>
+
+<div class="caesar3_ui">
+
+    <nav>
+        <ul>
+            <li><a href="">File</a></li>
+            <li><a href="">Options</a></li>
+            <li><a href="">Help</a></li>
+            <li>
+                <a href="">Advisors</a>
+            </li>
+            <li>
+                <a href="">Debug</a>
+                <ul class="dropdown">
+                    <li><a href="" id="showMissionDialog">Mission dialog</a></li>
+                    <li><a href="" id="showVideoDialog">Video dialog</a></li>
+                    <li><a href="" id="showNameDialog">Name dialog</a></li>
+                </ul>
+            </li>
+        </ul>
+
+        <div class="stats">
+            <div class="stat">Dn 102</div>
+            <div class="stat">Pop 31</div>
+            <div class="stat stat-year">Feb 332 BC</div>
+        </div>
+    </nav>
+
+    <main>
+        <div class="map" id="mapContainer">
+
+            <dialog id="missionDialog">
+                <div class="dialog-content">
+                    <h2>The New Governor</h2>
+
+                    <div class="mb-2">A Village is Born</div>
+
+                    <div class="scrollable-container mb-2">
+                        <div class="scrollable">
+                            <p>Objectives</p>
+
+                            <button class="btn btn-block btn-default" disabled>Population of 150</button>
+                            <button class="btn btn-block btn-default" disabled>Imediate goals build some houses.</button>
+                        </div>
+                    </div>
+                    <div class="scrollable-container mb-2">
+                        <div class="scrollable" style="height: 200px;">
+                            <p>Let your gubernatorial training begin!</p>
+                            <p>First, you must learn the basics of constructing Roman settlements.</p>
+                            <p>Build areas of housing, and you'll soon see people move in to your city.</p>
+
+                            <img class="img-center" src="assets/images/tutorial/img1.png" />
+
+                            <p>Paths</p>
+                            <p>You can click and drag the mouse to build lengths of path at once.</p>
+
+                            <img class="img-center" src="assets/images/tutorial/img2.png" />
+                            <p>You can click and drag the mouse to build lengths of path at once.</p>
+                            <p>Plan paths carefully, with as few intersections as possible, to ensure people will walk where you want them to. At every intersection, walkers must choose which way to go. Each intersection lessens your control over their actual routes.</p>
+
+                            <img class="img-center" src="assets/images/tutorial/img3.png" />
+                        </div>
+                    </div>
+
+                    <div class="d-flex">
+                        <div class="spacer"></div>
+                        <button data-action="close" class="btn btn-block btn-default">To the city</button>
+                    </div>
+                </div>
+                <div class="dialog-corners"></div>
+            </dialog>
+
+            <dialog id="nameDialog">
+                <div class="dialog-content">
+                    <h2>Please enter your name</h2>
+
+                    <div class="scrollable-container noscroll mb-2">
+                        <div>
+                            <input class="form-control" value="The new governor" type="text" />
+                        </div>
+                    </div>
+                    <div class="d-flex">
+                        <div class="spacer"></div>
+                        <button data-action="close" class="btn btn-block btn-round-next">Continue</button>
+                    </div>
+                </div>
+                <div class="dialog-corners"></div>
+            </dialog>
+
+            <dialog id="videoDialog" class="video-dialog">
+                <video id="video" src="./assets/videos/urgent_message1.mp4"></video>
+
+                    <div class="scrollable-container noscroll">
+                        <div>
+                            <p>Jul 345 BC&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;To Player</p>
+                            <p>Rome has need of the following goods. Please arrange for their swift dispatch.</p>
+
+                        </div>
+                    </div>
+
+                <div class="dialog-content">
+                    <div class="d-flex">
+                        <a href="#" class="btn btn-block btn-sm-question"></a>
+                        <div class="spacer text-center">
+                            Emperor requests goods
+                        </div>
+                        <a href="#" data-action="close" class="btn btn-block btn-sm-next"></a>
+                    </div>
+                </div>
+                <div class="dialog-corners"></div>
+            </dialog>
+
+            <div class="d-overlays-menu" id="menuOverlays">
+                <button class="btn btn-block btn-default">Normal</button>
+                <button class="btn btn-block btn-default">Grid</button>
+                <button class="btn btn-block btn-default">Water</button>
+            </div>
+
+            <div class="d-buildings-menu" id="menuBuildings">
+                <button class="btn btn-block btn-default">
+                    Well
+                </button>
+                <button class="btn btn-block btn-default">
+                    Farm
+                    <span>40Dn</span>
+                </button>
+                <button class="btn btn-block btn-default">
+                    Water
+                    <span>40Dn</span>
+                </button>
+            </div>
+
+            <canvas id="main"></canvas>
+        </div>
+
+        <aside>
+            <div class="aside-buttons">
+                <div class="top-buttons">
+                    <button class="btn btn-overlay" id="btnOverlay">Overlay</button>
+                    <button disabled class="btn btn-toggle-sidebar"></button>
+                </div>
+
+                <div class="minimap">
+                    <canvas id="minimap"></canvas>
+                </div>
+
+                <div class="btn-row">
+                    <button class="btn btn-senat"></button>
+                    <button class="btn btn-map"></button>
+                </div>
+
+                <div class="btn-row">
+                    <button class="btn btn-doc"></button>
+                    <button class="btn btn-north"></button>
+                    <button class="btn btn-rotate-cw"></button>
+                    <button class="btn btn-rotate-ccw"></button>
+                </div>
+
+                <div class="img-placeholder"></div>
+
+                <div class="build-buttons">
+                    <button data-building="house" class="btn icon-house"></button>
+                    <button data-building="house" class="btn icon-showel"></button>
+                    <button data-building="house" class="btn icon-road"></button>
+                    <button data-building="house" class="btn icon-water"></button>
+                    <button data-building="house" class="btn icon-medical"></button>
+                    <button data-building="house" disabled class="btn icon-gods"></button>
+                    <button data-building="house" class="btn icon-edu"></button>
+                    <button data-building="house" class="btn icon-ent"></button>
+                    <button data-building="house" class="btn icon-gov"></button>
+                    <button data-building="house" class="btn icon-eng"></button>
+                    <button data-building="house" class="btn icon-prot"></button>
+                    <button data-building="house" class="btn icon-mar"></button>
+                    <button data-building="house" disabled class="btn icon-cancel"></button>
+                    <button data-building="house" class="btn icon-messages">0</button>
+                    <button data-building="house" disabled class="btn icon-bell"></button>
+                </div>
+            </div>
+            <div class="aside-placeholder"></div>
+        </aside>
+    </main>
+
+</div>
+
+<script type="module">
+    import DependencyInjection from '/src/DependencyInjection.mjs';
+    import SceneManager from '/src/SceneManager.mjs';
+    import ResourceManager from '/src/ResourceManager.mjs';
+    import DrawingContext from '/src/DrawingContext.mjs';
+    import InputManager from '/src/InputManager.mjs';
+    import MapReader from './src/MapReader.mjs';
+    import SettingsUI from './src/SettingsUI.mjs';
+    import Map from './src/Map.mjs';
+    import GameScene from './src/Scenes/GameScene.mjs';
+
+    async function bootstrap() {
+        const di = DependencyInjection.createRoot({
+            ResourceManager,
+            DrawingContext,
+            InputManager
+        });
+        const mainCanvas = document.getElementById('main');
+        di.set('canvas', mainCanvas);
+
+        const sceneManager = di.get(SceneManager);
+        const drawingContext = di.get(DrawingContext);
+
+        const scene = await sceneManager.loadScene(GameScene);
+
+        drawingContext.bindToElement(document.getElementById('mapContainer'));
+        drawingContext.loop();
+
+        const mapContent = await loadMap();
+        const mapData = new MapReader(mapContent);
+        scene.map = new Map(di, mapData);
+
+        document.getElementById('showMissionDialog').onclick = function(e) {
+            e.preventDefault();
+            showMissionDialog();
+        };
+        document.getElementById('showVideoDialog').onclick = function(e) {
+            e.preventDefault();
+            showVideoDialog();
+        };
+        document.getElementById('showNameDialog').onclick = function(e) {
+            e.preventDefault();
+            showDialog('nameDialog');
+        };
+        document.getElementById('btnOverlay').onclick = function(e) {
+            e.preventDefault();
+            toggleOverlays();
+        };
+        for (const btn of document.querySelectorAll('[data-building]')) {
+            btn.onclick = function(e) {
+                e.preventDefault();
+                toggleBuildings();
+            };
+        }
+    }
+    bootstrap();
+
+    function toggleOverlays() {
+        document.getElementById('menuOverlays').classList.toggle('show');
+    }
+
+    function toggleBuildings() {
+        document.getElementById('menuBuildings').classList.toggle('show');
+    }
+
+    function showMissionDialog() {
+        showDialog('missionDialog');
+    }
+
+    function showVideoDialog() {
+        const dialog = showDialog('videoDialog');
+        document.getElementById('video').currentTime = 0;
+        document.getElementById('video').play();
+        dialog.addEventListener('close', () => {
+            document.getElementById('video').currentTime = 0;
+            document.getElementById('video').pause();
+        });
+    }
+
+    function showDialog(id) {
+        const dialog = document.getElementById(id);
+        dialog.show();
+        const closeBtn = dialog.querySelector('[data-action="close"]');
+        const hide = (e) => {
+            e.preventDefault();
+            closeBtn.removeEventListener('click', hide);
+            dialog.close();
+        };
+        closeBtn.addEventListener('click', hide);
+        return dialog;
+    }
+
+    function loadMap(){
+        return new Promise((resolve, reject) => {
+            const request = new XMLHttpRequest();
+            request.open('GET', 'assets/maps/Brigantium.map', true);
+            // request.responseType = 'arraybuffer';
+            request.overrideMimeType('application/octet-stream; charset=us-ascii');
+            request.send(null);
+            request.onerror = reject;
+            request.onreadystatechange = function () {
+                if (request.readyState === 4 && request.status === 200) {
+                    resolve(request.responseText);
+                }
+            }
+        })
+    }
+</script>
+</body>
+</html>

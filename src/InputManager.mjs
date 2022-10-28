@@ -10,12 +10,15 @@ class InputManager extends EventEmitter {
     this.canvas = canvas;
 
     canvas.addEventListener('click', (e) => {
-      this.emit('click', { x: e.pageX, y: e.pageY });
+      this.emit('click', { x: e.offsetX, y: e.offsetY });
     });
     canvas.addEventListener('mousemove', (e) => {
-      this.emit('move', { x: e.pageX, y: e.pageY });
+      this.emit('move', { x: e.offsetX, y: e.offsetY });
     });
-    document.addEventListener('keydown', (e) => {
+    canvas.addEventListener('mouseout', (e) => {
+      this.emit('mouseout', { x: e.offsetX, y: e.offsetY });
+    });
+    canvas.addEventListener('keydown', (e) => {
       e.preventDefault();
       e.stopPropagation();
       if (!this.#state[e.code]) {
@@ -23,7 +26,7 @@ class InputManager extends EventEmitter {
         this.emit('changeState', this.#state);
       }
     });
-    document.addEventListener('keyup', (e) => {
+    canvas.addEventListener('keyup', (e) => {
       e.preventDefault();
       e.stopPropagation();
       if (this.#state[e.code]) {

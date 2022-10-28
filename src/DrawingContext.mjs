@@ -6,6 +6,8 @@ export default
 class DrawingContext extends EventEmitter {
   #camera = null;
 
+  #bindedElement = null;
+
   constructor({ canvas }) {
     super();
 
@@ -18,16 +20,23 @@ class DrawingContext extends EventEmitter {
   }
 
   bindToWindow() {
-    this.canvas.width = window.innerWidth;
-    this.canvas.height = window.innerHeight;
+    this.bindToElement(window);
+  }
+
+  bindToElement(el) {
+    this.#bindedElement = el;
 
     window.addEventListener('orientationchange', this.#onResize.bind(this));
     window.addEventListener('resize', this.#onResize.bind(this));
+    this.#onResize();
   }
 
   #onResize() {
-    this.canvas.width = window.innerWidth;
-    this.canvas.height = window.innerHeight;
+    if (!this.#bindedElement) {
+      return;
+    }
+    this.canvas.width = this.#bindedElement.innerWidth || this.#bindedElement.offsetWidth; // якщо window, то innerWidth, інакше width
+    this.canvas.height = this.#bindedElement.innerHeight || this.#bindedElement.offsetHeight;
   }
 
   get width() {

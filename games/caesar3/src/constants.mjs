@@ -1,6 +1,6 @@
 export const MAX_MAP_SIZE = 160;
-
 export const MAP_SIZE_AND_BORDER = MAX_MAP_SIZE + 2;
+export const MAP_MOVE_BORDER = 50; // Зона краю коли почне рухатись карта по курсору
 
 export const LAYER_TERRAIN = 2;
 export const LAYER_ROAD = 4;

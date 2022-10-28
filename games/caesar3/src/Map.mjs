@@ -3,7 +3,7 @@ import {
     DIRECTION_WEST,
     DIRECTION_NORTH,
     DIRECTION_SOUTH,
-    DIRECTION_EAST
+    DIRECTION_EAST, MAP_MOVE_BORDER
 } from './constants.mjs';
 import GridLayer from './Layers/GridLayer.mjs';
 import { createOffscreenCanvas } from './helpers/offscreenCanvas.mjs';
@@ -40,7 +40,7 @@ class Map {
         [LAYER_GRID]: null,
     };
 
-    #enabledLayers = LAYER_GRID;
+    #enabledLayers = LAYER_TERRAIN;
 
     #mapOffset = [0, 0];
 

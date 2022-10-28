@@ -1,4 +1,5 @@
 import Scene from '../../../../src/Scene.mjs';
+import { moveMapNearBorder, outMapNearBorder } from '../helpers/moveMapNearBorder.mjs';
 
 const NORTH_ATLAS = 'atlases/north1.atlas';
 const MAIN_ATLAS = 'atlases/main1.atlas';
@@ -55,11 +56,13 @@ class GameScene extends Scene {
     pause() {
         this.#inputManager.off('click');
         this.#inputManager.off('move');
+        this.#inputManager.off('mouseout');
     }
 
     resume() {
         this.#inputManager.on('click', this.click.bind(this));
         this.#inputManager.on('move', this.move.bind(this));
+        this.#inputManager.on('mouseout', this.mouseout.bind(this));
         this.#canvas.addEventListener('wheel', (e) => {
             e.preventDefault(); // disable the actual scrolling
 
@@ -77,5 +80,14 @@ class GameScene extends Scene {
             return;
         }
         this.#map.mouseMove(x, y);
+
+        moveMapNearBorder(this.#map, this.#canvas, { x, y });
+    }
+
+    mouseout({ x, y }) {
+        if (!this.#map) {
+            return;
+        }
+        outMapNearBorder();
     }
 }
