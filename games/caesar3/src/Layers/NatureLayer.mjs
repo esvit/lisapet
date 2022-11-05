@@ -1,6 +1,7 @@
 import AbstractLayer from './AbstractLayer.mjs';
 import { pad } from '../helpers/math.mjs';
 import {
+    TERRAIN_GARDEN,
     TERRAIN_MEADOW,
     TERRAIN_ROAD,
     TERRAIN_ROCK,
@@ -9,19 +10,14 @@ import {
 } from '../constants.mjs';
 
 export default
-class TerrainLayer extends AbstractLayer {
+class NatureLayer extends AbstractLayer {
     drawLayer() {
         const tiles = this.map.getTiles();
         for (const tile of tiles) {
             const { tile: imgId, terrain, edge } = tile;
-            const tileSprite = this.getTile(tile);
-            if (!tileSprite) {
-                continue;
-            }
-            const [res, tileId] = tileSprite;
+            const [res, tileId] = this.getTile(tile);
 
-
-            if (edge & 0x40) {
+            if (terrain & TERRAIN_TREE || terrain & TERRAIN_GARDEN) {
                 // if (edge - 0x40 === 8) {
                 //     this.drawTile(tile, `${res}_${pad(6, 5)}`);
                 // } else {
@@ -90,13 +86,13 @@ class TerrainLayer extends AbstractLayer {
         } else if( tile < 871) {
             return ['land3a', tile - 778];
         } else if( tile < 2900) {
-            // return ['housng1a', tile - 2829];
+            return ['housng1a', tile - 2829];
         } else {
-            // if (tile === 0xb10 || tile === 0xb0d)
-            // {
-            //     return ['housng1a', 51];
-            // }
-            // return ['land1a', 1];
+            if (tile === 0xb10 || tile === 0xb0d)
+            {
+                return ['housng1a', 51];
+            }
+            return ['land1a', 1];
         }
     }
 }

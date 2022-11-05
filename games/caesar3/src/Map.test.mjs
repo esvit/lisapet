@@ -1,12 +1,17 @@
 import Map from './Map.mjs';
 
 describe('test', () => {
-    const di = {};
+    const di = {
+        scope: () => ({
+            set: () => {},
+            get: () => {}
+        })
+    };
 
     test('toCordinates', () => {
         const WIDTH = 20;
         const HEIGHT = 10;
-        const map = new Map(di, WIDTH, HEIGHT);
+        const map = new Map(di, {}, WIDTH, HEIGHT);
         map.mapWidth = 160;
         map.halfSize = 80;
 
@@ -23,7 +28,7 @@ describe('test', () => {
     test('fromCordinates', () => {
         const WIDTH = 20;
         const HEIGHT = 10;
-        const map = new Map(di, WIDTH, HEIGHT);
+        const map = new Map(di, {}, WIDTH, HEIGHT);
         map.mapWidth = 160;
         map.halfSize = 80;
 
@@ -37,7 +42,7 @@ describe('test', () => {
     test('fromCordinates zoom', () => {
         const WIDTH = 58;
         const HEIGHT = 30;
-        const map = new Map(di, WIDTH, HEIGHT);
+        const map = new Map(di, {}, WIDTH, HEIGHT);
         map.mapWidth = 160;
         map.halfSize = 80;
         let zoom = 1;
@@ -58,39 +63,41 @@ describe('test', () => {
         map.zoom = 0.5;
         expect(map.drawWidth).toEqual(4698);
         expect(map.move(map.mapOffset[0] + 1886, map.mapOffset[1] + 15)).toEqual([-1208, -15]);
-        expect(map.fromCordinates(785, 21)).toEqual([0, 0]);
+        expect(map.fromCordinates(1698, 0)).toEqual([0, 0]);
     });
 
     test('getNeighbors', () => {
         const WIDTH = 20;
         const HEIGHT = 10;
-        const map = new Map(di, WIDTH, HEIGHT);
+        const mapData = {
+            tileId: new Array(162 * 162),
+            terrainInfo: new Array(162 * 162),
+            edgeData: new Array(162 * 162),
+            heightInfo: new Array(162 * 162),
+        };
+        mapData.tileId[80 * 162 + 80 - 1] = 'W';
+        mapData.tileId[80 * 162 + 80 + 1] = 'E';
+        mapData.tileId[(80 - 1) * 162 + 80] = 'N';
+        mapData.tileId[(80 + 1) * 162 + 80] = 'S';
+
+        mapData.terrainInfo[80 * 162 + 80 - 1] = 'W';
+        mapData.terrainInfo[80 * 162 + 80 + 1] = 'E';
+        mapData.terrainInfo[(80 - 1) * 162 + 80] = 'N';
+        mapData.terrainInfo[(80 + 1) * 162 + 80] = 'S';
+
+        mapData.edgeData[80 * 162 + 80 - 1] = 'W';
+        mapData.edgeData[80 * 162 + 80 + 1] = 'E';
+        mapData.edgeData[(80 - 1) * 162 + 80] = 'N';
+        mapData.edgeData[(80 + 1) * 162 + 80] = 'S';
+
+        mapData.heightInfo[80 * 162 + 80 - 1] = 'W';
+        mapData.heightInfo[80 * 162 + 80 + 1] = 'E';
+        mapData.heightInfo[(80 - 1) * 162 + 80] = 'N';
+        mapData.heightInfo[(80 + 1) * 162 + 80] = 'S';
+
+        const map = new Map(di, mapData, WIDTH, HEIGHT);
         map.mapWidth = 160;
         map.halfSize = 80;
-        map.tileId = new Array(162 * 162);
-        map.terrainInfo = new Array(162 * 162);
-        map.edgeData = new Array(162 * 162);
-        map.heightInfo = new Array(162 * 162);
-
-        map.tileId[80 * 162 + 80 - 1] = 'W';
-        map.tileId[80 * 162 + 80 + 1] = 'E';
-        map.tileId[(80 - 1) * 162 + 80] = 'N';
-        map.tileId[(80 + 1) * 162 + 80] = 'S';
-
-        map.terrainInfo[80 * 162 + 80 - 1] = 'W';
-        map.terrainInfo[80 * 162 + 80 + 1] = 'E';
-        map.terrainInfo[(80 - 1) * 162 + 80] = 'N';
-        map.terrainInfo[(80 + 1) * 162 + 80] = 'S';
-
-        map.edgeData[80 * 162 + 80 - 1] = 'W';
-        map.edgeData[80 * 162 + 80 + 1] = 'E';
-        map.edgeData[(80 - 1) * 162 + 80] = 'N';
-        map.edgeData[(80 + 1) * 162 + 80] = 'S';
-
-        map.heightInfo[80 * 162 + 80 - 1] = 'W';
-        map.heightInfo[80 * 162 + 80 + 1] = 'E';
-        map.heightInfo[(80 - 1) * 162 + 80] = 'N';
-        map.heightInfo[(80 + 1) * 162 + 80] = 'S';
 
         expect(map.getNeighbors(80, 80)).toEqual([
             {

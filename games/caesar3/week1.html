@@ -76,6 +76,7 @@
             reader.onload = function({ target }) {
                 const mapData = new MapReader(target.result);
                 scene.map = new Map(di, mapData);
+                scene.map.initMap();
 
                 try {
                     di.get('settings').destroy();

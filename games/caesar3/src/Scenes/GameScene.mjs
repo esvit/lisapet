@@ -16,13 +16,16 @@ class GameScene extends Scene {
 
     #inputManager = null;
 
-    constructor({ canvas, DrawingContext, ResourceManager, InputManager }) {
+    #gameUI = null;
+
+    constructor({ canvas, DrawingContext, ResourceManager, InputManager, GameUI }) {
         super();
 
         this.#canvas = canvas;
         this.#drawingContext = DrawingContext;
         this.#resourceManager = ResourceManager;
         this.#inputManager = InputManager;
+        this.#gameUI = GameUI;
     }
 
     get map() {
@@ -31,6 +34,7 @@ class GameScene extends Scene {
 
     set map(val) {
         this.#map = val;
+        this.#gameUI.bind(val);
     }
 
     async loading() {
@@ -66,13 +70,22 @@ class GameScene extends Scene {
         this.#canvas.addEventListener('wheel', (e) => {
             e.preventDefault(); // disable the actual scrolling
 
+            this.#map.visibleAreaSize = [this.#drawingContext.width, this.#drawingContext.height];
             this.#map.move(-e.deltaX, -e.deltaY);
         }, { passive: false });
     }
 
     click({ x, y }) {
-        const res = this.#map.fromCordinates(x, y);
-        console.info(res, this.#map.get(res[0], res[1]), this.#map.toCordinates(res[0] + 1, res[1] + 1), );
+        const [mapX, mapY] = this.#map.fromCordinates(x, y);
+        const terrainInfo = this.#map.getTerrainInfo(mapX, mapY)
+        const { tile, edge } = this.#map.get(mapX, mapY)
+        this.#gameUI.showTerrainInfoDialog({
+            ...terrainInfo,
+            tile,
+            edge,
+            mapX, mapY
+        });
+        // console.info(res, terrainInfo, this.#map.toCordinates(res[0] + 1, res[1] + 1), );
     }
 
     move({ x, y }) {

@@ -4,7 +4,17 @@ export const MAP_MOVE_BORDER = 50; // Зона краю коли почне ру
 
 export const LAYER_TERRAIN = 2;
 export const LAYER_ROAD = 4;
+export const LAYER_NATURE = 8;
+export const LAYER_COLOR = 0x4000;
 export const LAYER_GRID = 0x8000;
+
+export const LAYERS = [
+    { id: LAYER_TERRAIN, title: 'Terrain' },
+    { id: LAYER_ROAD, title: 'Road' },
+    { id: LAYER_NATURE, title: 'Nature' },
+    { id: LAYER_COLOR, title: 'Colors' },
+    { id: LAYER_GRID, title: 'Grid' },
+];
 
 export const DIRECTION_NONE = 0;
 export const DIRECTION_NORTH = 1;
@@ -24,16 +34,45 @@ export const TERRAIN_AQUEDUCT = 0x100;
 export const TERRAIN_ELEVATION = 0x200;
 export const TERRAIN_ACCESS_RAMP = 0x400;
 export const TERRAIN_MEADOW = 0x800;
-export const TERRAIN_RUBBLE = 0x1000;
+export const TERRAIN_RUBBLE = 0x1000; // уламки будівлі
 export const TERRAIN_FOUNTAIN_RANGE = 0x2000;
 export const TERRAIN_WALL = 0x4000;
 export const TERRAIN_GATEHOUSE = 0x8000;
-export const TERRAIN_NONE = 5;
 
+export const EDGE_OCCUPIED = 0x40;
+
+// special
+export const TERRAIN_NONE = 0;
 export const TERRAIN_WALL_OR_GATEHOUSE = TERRAIN_WALL | TERRAIN_GATEHOUSE;
-export const TERRAIN_NOT_CLEAR = 0xd77f;
-export const TERRAIN_CLEARABLE = 0xd17f;
+// 0xd77f
+export const TERRAIN_NOT_CLEAR = TERRAIN_TREE | TERRAIN_ROCK | TERRAIN_WATER | TERRAIN_BUILDING | TERRAIN_SHRUB
+                                | TERRAIN_GARDEN | TERRAIN_ROAD | TERRAIN_AQUEDUCT | TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP
+                                | TERRAIN_RUBBLE | TERRAIN_WALL | TERRAIN_GATEHOUSE;
+// 0xd17f
+export const TERRAIN_CLEARABLE  = TERRAIN_TREE | TERRAIN_ROCK | TERRAIN_WATER | TERRAIN_BUILDING | TERRAIN_SHRUB
+                                | TERRAIN_GARDEN | TERRAIN_ROAD | TERRAIN_AQUEDUCT
+                                | TERRAIN_RUBBLE | TERRAIN_WALL | TERRAIN_GATEHOUSE;
+
 export const TERRAIN_IMPASSABLE = 0xc75f;
 export const TERRAIN_IMPASSABLE_ENEMY = 0x1237;
 export const TERRAIN_IMPASSABLE_WOLF = 0xd73f;
 export const TERRAIN_ALL = 0xffff;
+
+export const TERRAIN_TYPES = [
+    { id: TERRAIN_TREE, title: 'Tree' },
+    { id: TERRAIN_ROCK, title: 'Rock' },
+    { id: TERRAIN_WATER, title: 'Water' },
+    { id: TERRAIN_BUILDING, title: 'Building' },
+    { id: TERRAIN_SHRUB, title: 'Shrub' },
+    { id: TERRAIN_GARDEN, title: 'Garden' },
+    { id: TERRAIN_ROAD, title: 'Road' },
+    { id: TERRAIN_RESERVOIR_RANGE, title: 'Reservoir range' },
+    { id: TERRAIN_AQUEDUCT, title: 'Aqueduct' },
+    { id: TERRAIN_ELEVATION, title: 'Elevation' },
+    { id: TERRAIN_ACCESS_RAMP, title: 'Access ramp' },
+    { id: TERRAIN_MEADOW, title: 'Meadow' },
+    { id: TERRAIN_RUBBLE, title: 'Rubble' },
+    { id: TERRAIN_FOUNTAIN_RANGE, title: 'Fountain range' },
+    { id: TERRAIN_WALL, title: 'Wall' },
+    { id: TERRAIN_GATEHOUSE, title: 'Gatehouse' },
+];

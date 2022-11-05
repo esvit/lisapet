@@ -18,25 +18,25 @@ class GridLayer extends AbstractLayer {
         const halfTileHeight = tileHeight / 2;
 
         if (!this.#grid) {
-            const border = this.map.mapBorder - 1;
+            const mapSize = this.map.size;
             const [x1, y1] = toCordinates(0, 0);
-            const [x2, y2] = toCordinates(0, MAX_MAP_SIZE);
-            const [x3, y3] = toCordinates(MAX_MAP_SIZE, MAX_MAP_SIZE);
-            const [x4, y4] = toCordinates(MAX_MAP_SIZE, 0);
+            const [x2, y2] = toCordinates(0, mapSize);
+            const [x3, y3] = toCordinates(mapSize, mapSize);
+            const [x4, y4] = toCordinates(mapSize, 0);
 
             this.#grid = [
-                { x1: drawWidth / 2, y1: 0, x2: drawWidth / 2, y2: tileHeight + (border * tileHeight) },
-                { x1: drawWidth / 2, y1: drawHeight - tileHeight - (border * tileHeight), x2: drawWidth / 2, y2: drawHeight },
-                { x1: 0, y1: drawHeight / 2, x2: tileWidth + (border * tileWidth), y2: drawHeight / 2 },
-                { x1: drawWidth, y1: drawHeight / 2, x2: drawWidth - tileWidth - (border * tileWidth), y2: drawHeight / 2 },
+                { x1: drawWidth / 2, y1: 0, x2: drawWidth / 2, y2: tileHeight },
+                { x1: drawWidth / 2, y1: drawHeight - tileHeight, x2: drawWidth / 2, y2: drawHeight },
+                { x1: 0, y1: drawHeight / 2, x2: tileWidth, y2: drawHeight / 2 },
+                { x1: drawWidth, y1: drawHeight / 2, x2: drawWidth - tileWidth, y2: drawHeight / 2 },
                 { x1: x1, y1: y1, x2: x2, y2: y2 },
                 { x1: x2, y1: y2, x2: x3, y2: y3 },
                 { x1: x3, y1: y3, x2: x4, y2: y4 },
                 { x1: x4, y1: y4, x2: x1, y2: y1 }
             ];
-            for (let x = border; x <= MAX_MAP_SIZE - border; x++) {
+            for (let x = 0; x <= mapSize; x++) {
                 const [x1, y1] = toCordinates(x, 0);
-                const [x2, y2] = toCordinates(x, MAX_MAP_SIZE);
+                const [x2, y2] = toCordinates(x, mapSize);
                 this.#grid.push({
                     x1: x1, y1: y1,
                     x2: x2, y2: y2
@@ -45,9 +45,9 @@ class GridLayer extends AbstractLayer {
                     this.drawingContext.drawText(`(${x},${0})`, x, 0, { color: '#fff', size: 12 });
                 }
             }
-            for (let y = border; y <= MAX_MAP_SIZE - border; y++) {
+            for (let y = 0; y <= mapSize; y++) {
                 const [x1, y1] = toCordinates(0, y);
-                const [x2, y2] = toCordinates(MAX_MAP_SIZE, y);
+                const [x2, y2] = toCordinates(mapSize, y);
                 this.#grid.push({
                     x1: x1, y1: y1,
                     x2: x2, y2: y2

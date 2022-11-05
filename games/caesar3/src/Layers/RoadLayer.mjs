@@ -2,6 +2,20 @@ import AbstractLayer from './AbstractLayer.mjs';
 import { pad } from '../helpers/math.mjs';
 import {DIRECTION_NONE, DIRECTION_WEST, DIRECTION_EAST, DIRECTION_NORTH, DIRECTION_SOUTH, TERRAIN_ROAD} from '../constants.mjs';
 
+const RED_ARROWS = {
+    [DIRECTION_NORTH]: 'land3a_00085',
+    [DIRECTION_WEST]: 'land3a_00086',
+    [DIRECTION_SOUTH]: 'land3a_00087',
+    [DIRECTION_EAST]: 'land3a_00088',
+};
+
+const BLUE_ARROWS = {
+    [DIRECTION_NORTH]: 'land3a_00089',
+    [DIRECTION_WEST]: 'land3a_00090',
+    [DIRECTION_SOUTH]: 'land3a_00091',
+    [DIRECTION_EAST]: 'land3a_00092',
+};
+
 export default
 class RoadLayer extends AbstractLayer{
     #road = {};
@@ -17,45 +31,48 @@ class RoadLayer extends AbstractLayer{
 
     rebuildTiles() {
         const tiles = this.map.getTiles(TERRAIN_ROAD);
-        for (const { mapX, mapY, drawX, drawY, drawW, drawH } of tiles) {
-            let direction = DIRECTION_NONE;
-
-            const neighbors = this.map.getNeighbors(mapX, mapY);
-            for (const nTile of neighbors) {
-                if (nTile.terrain & TERRAIN_ROAD) {
-                    direction |= nTile.direction;
-                }
-            }
+        for (const { mapX, mapY, drawX, drawY, drawW, drawH, tileSize } of tiles) {
+            const direction = this.getRoadDirection(mapX, mapY);
 
             const res = 'land2a';
             const tileId = this.getTileByDirection(direction);
 
             this.#road[`${mapX}-${mapY}`] = {
-                drawX, drawY, drawW, drawH,
+                drawX, drawY, drawW, drawH, tileSize,
                 tileId: `${res}_${pad(tileId, 5)}`
             };
         }
     }
 
-    drawLayer() {
-        if (this.#road) {
-            for (const key in this.#road) {
-                const {drawX, drawY, drawW, drawH, tileId} = this.#road[key];
-
-                this.drawTile({drawX, drawY, drawW, drawH}, tileId);
+    getRoadDirection(x, y) {
+        const neighbors = this.map.getNeighbors(x, y);
+        let direction = DIRECTION_NONE;
+        for (const nTile of neighbors) {
+            if (nTile.terrain & TERRAIN_ROAD) {
+                direction |= nTile.direction;
             }
+        }
+        return direction;
+    }
+
+    drawLayer() {
+        for (const key in this.#road) {
+            const { drawX, drawY, drawW, drawH, tileId, tileSize } = this.#road[key];
+
+            this.drawTile({ drawX, drawY, drawW, drawH, tileSize }, tileId);
         }
 
         const [x1, y1, x2, y2] = this.map.data.peopleEntryPoint;
         { // entry
-            const [drawX, drawY, drawW, drawH] = this.map.toCordinates(x1 + this.map.mapBorder, y1 + this.map.mapBorder);
-
-            this.drawTile({ drawX, drawY, drawW, drawH }, 'land3a_00087');
+            const [drawX, drawY, drawW, drawH] = this.map.toCordinates(x1, y1);
+            const direction = this.getRoadDirection(x1, y1);
+            this.drawTile({ drawX, drawY, drawW, drawH }, RED_ARROWS[direction]);
         }
         { // exit
-            const [drawX, drawY, drawW, drawH] = this.map.toCordinates(x2 + this.map.mapBorder, y2 + this.map.mapBorder);
+            const [drawX, drawY, drawW, drawH] = this.map.toCordinates(x2, y2);
+            const direction = this.getRoadDirection(x2, y2);
 
-            this.drawTile({ drawX, drawY, drawW, drawH }, 'land3a_00085');
+            this.drawTile({ drawX, drawY, drawW, drawH }, BLUE_ARROWS[direction]);
         }
     }
 

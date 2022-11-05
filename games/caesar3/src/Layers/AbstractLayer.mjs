@@ -8,23 +8,21 @@ class AbstractLayer {
     }
 
     drawTile(tile, name) {
-        const { drawX, drawY, drawW, drawH } = tile;
+        const { drawX, drawY, drawW, drawH, tileSize = 1 } = tile;
 
         const sprite = this.resourceManager.getByAtlas(name);
         if (sprite) {
             const [img, tileX, tileY, tileW, tileH] = sprite;
-            let h = tileH % drawH;
-            if (tileH > 50) { // фікс для тайлів більше 1х1
-                // h += this.map.tileHeight / 2;
-            }
-            if (name === 'land3a_00087') {
-                console.info(h, drawY, drawH, tileH, drawY + drawH - tileH, tileH)
-            }
+            let x = drawX - drawW / 2;
+            let y = drawY - drawH - (tileH - drawH) + drawH / 2 * tileSize + drawH / 2;
+            // if (name === 'land2a_00093')
+            // console.info(tileSize)
+            // let y = drawY + drawH + drawH - tileH + (h - 1) * drawH / 2;
 
             this.drawingContext.drawSprite(
                 img,
                 tileX, tileY, tileW, tileH,
-                drawX + drawW - tileW, drawY + drawH - tileH, tileW, tileH
+                x, y, tileW, tileH
             );
             // if (name === 'land3a_00067' && drawY === 653) {
             //     console.info(((tileH - drawH) / this.map.tileHeight - 0.5));
