@@ -138,11 +138,7 @@
                 <div class="dialog-corners"></div>
             </dialog>
 
-            <div class="d-overlays-menu" id="menuOverlays">
-                <button class="btn btn-block btn-default">Normal</button>
-                <button class="btn btn-block btn-default">Grid</button>
-                <button class="btn btn-block btn-default">Water</button>
-            </div>
+            <div class="d-overlays-menu" id="menuOverlays"></div>
 
             <div class="d-buildings-menu" id="menuBuildings">
                 <button class="btn btn-block btn-default">
@@ -187,9 +183,9 @@
                 <div class="img-placeholder"></div>
 
                 <div class="build-buttons">
-                    <button data-building="house" class="btn icon-house"></button>
-                    <button data-building="house" class="btn icon-showel"></button>
-                    <button data-building="house" class="btn icon-road"></button>
+                    <button data-tool="house" class="btn icon-house"></button>
+                    <button data-tool="shovel" class="btn icon-shovel"></button>
+                    <button data-tool="road" class="btn icon-road"></button>
                     <button data-building="house" class="btn icon-water"></button>
                     <button data-building="house" class="btn icon-medical"></button>
                     <button data-building="house" disabled class="btn icon-gods"></button>
@@ -206,6 +202,31 @@
             </div>
             <div class="aside-placeholder"></div>
         </aside>
+
+        <dialog id="terrainInfoDialog">
+            <div class="dialog-content">
+                <div class="scrollable-container noscroll mb-2">
+                    <div>
+                        <div>
+                            X: <span data-bind="mapX"></span>, Y: <span data-bind="mapY"></span>,
+                            Tile: <span data-bind="tile"></span>,
+                            Edge: <span data-bind="edge"></span>,
+                            Minimap: <span data-bind="minimapInfo"></span>,
+                            Elevation: <span data-bind="elevation"></span>
+                        </div>
+                        <pre data-bind="terrainInfo"></pre>
+                    </div>
+                </div>
+            </div>
+            <div class="dialog-content">
+                <div class="d-flex">
+                    <a href="#" class="btn btn-block btn-sm-question"></a>
+                    <div class="spacer"></div>
+                    <a href="#" data-action="close" class="btn btn-block btn-sm-next"></a>
+                </div>
+            </div>
+            <div class="dialog-corners"></div>
+        </dialog>
     </main>
 
 </div>
@@ -217,7 +238,7 @@
     import DrawingContext from '/src/DrawingContext.mjs';
     import InputManager from '/src/InputManager.mjs';
     import MapReader from './src/MapReader.mjs';
-    import SettingsUI from './src/SettingsUI.mjs';
+    import GameUI from './src/GameUI.mjs';
     import Map from './src/Map.mjs';
     import GameScene from './src/Scenes/GameScene.mjs';
 
@@ -225,7 +246,8 @@
         const di = DependencyInjection.createRoot({
             ResourceManager,
             DrawingContext,
-            InputManager
+            InputManager,
+            GameUI
         });
         const mainCanvas = document.getElementById('main');
         di.set('canvas', mainCanvas);
@@ -238,86 +260,31 @@
         drawingContext.bindToElement(document.getElementById('mapContainer'));
         drawingContext.loop();
 
-        document.getElementById('showMissionDialog').onclick = function(e) {
+        scene.map = new Map(di, {});
+        scene.map.visibleAreaSize = [drawingContext.width, drawingContext.height];
+        scene.map.initDebugMap();
+        mainCanvas.addEventListener('dragover', function(e) {
+            e.stopPropagation();
             e.preventDefault();
-            showMissionDialog();
-        };
-        document.getElementById('showVideoDialog').onclick = function(e) {
+            e.dataTransfer.dropEffect = 'copy';
+        });
+        mainCanvas.addEventListener('drop', function(e) {
+            e.stopPropagation();
             e.preventDefault();
-            showVideoDialog();
-        };
-        document.getElementById('showNameDialog').onclick = function(e) {
-            e.preventDefault();
-            showDialog('nameDialog');
-        };
-        document.getElementById('btnOverlay').onclick = function(e) {
-            e.preventDefault();
-            toggleOverlays();
-        };
-        for (const btn of document.querySelectorAll('[data-building]')) {
-            btn.onclick = function(e) {
-                e.preventDefault();
-                toggleBuildings();
-            };
-        }
+            const [file] = e.dataTransfer.files;
 
-        const mapContent = await loadMap();
-        const mapData = new MapReader(mapContent);
-        scene.map = new Map(di, mapData);
-        scene.map.initMap();
-    }
-    bootstrap();
+            const reader = new FileReader();
 
-    function toggleOverlays() {
-        document.getElementById('menuOverlays').classList.toggle('show');
-    }
-
-    function toggleBuildings() {
-        document.getElementById('menuBuildings').classList.toggle('show');
-    }
-
-    function showMissionDialog() {
-        showDialog('missionDialog');
-    }
-
-    function showVideoDialog() {
-        const dialog = showDialog('videoDialog');
-        document.getElementById('video').currentTime = 0;
-        document.getElementById('video').play();
-        dialog.addEventListener('close', () => {
-            document.getElementById('video').currentTime = 0;
-            document.getElementById('video').pause();
+            reader.onload = function({ target }) {
+                const mapData = new MapReader(target.result);
+                scene.map = new Map(di, mapData);
+                scene.map.visibleAreaSize = [drawingContext.width, drawingContext.height];
+                scene.map.initMap();
+            }
+            reader.readAsBinaryString(file);
         });
     }
-
-    function showDialog(id) {
-        const dialog = document.getElementById(id);
-        dialog.show();
-        const closeBtn = dialog.querySelector('[data-action="close"]');
-        const hide = (e) => {
-            e.preventDefault();
-            closeBtn.removeEventListener('click', hide);
-            dialog.close();
-        };
-        closeBtn.addEventListener('click', hide);
-        return dialog;
-    }
-
-    function loadMap(){
-        return new Promise((resolve, reject) => {
-            const request = new XMLHttpRequest();
-            request.open('GET', 'assets/maps/Brigantium.map', true);
-            // request.responseType = 'arraybuffer';
-            request.overrideMimeType('application/octet-stream; charset=us-ascii');
-            request.send(null);
-            request.onerror = reject;
-            request.onreadystatechange = function () {
-                if (request.readyState === 4 && request.status === 200) {
-                    resolve(request.responseText);
-                }
-            }
-        })
-    }
+    bootstrap();
 </script>
 </body>
 </html>

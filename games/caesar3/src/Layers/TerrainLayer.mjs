@@ -1,27 +1,48 @@
 import AbstractLayer from './AbstractLayer.mjs';
 import { pad } from '../helpers/math.mjs';
 import {
-    TERRAIN_MEADOW,
-    TERRAIN_ROAD,
-    TERRAIN_ROCK,
-    TERRAIN_SHRUB,
-    TERRAIN_TREE,
+    EDGE_OCCUPIED, TERRAIN_CLEARABLE,
+    TERRAIN_ROAD
 } from '../constants.mjs';
+import Area from "../Area.mjs";
 
+const GROUPS = [
+    { id: 'plateau', start: 200, count: 44 },
+    { id: 'land1a', start: 244, count: 303 },
+    { id: 'land2a', start: 547, count: 231 },
+    { id: 'land3a', start: 778, count: 50 },
+    { id: 'housng1a', start: 2829, count: 50 }
+];
+
+// commerce - 00001 - 00167 - 167
+// entertainment - 00001 - 00116 - 116
+// plaza - 03139 - 03144 - 6
+// security - 00001 - 00061 - 61
+// transport - 00001 - 00093 - 93
+// utilitya - 00001 - 00057 - 57
+// well - 00001 - 00004 - 4
 export default
 class TerrainLayer extends AbstractLayer {
     drawLayer() {
+        const selectedZone = this.map.selectedArea ? new Area(...this.map.selectedArea) : null;
         const tiles = this.map.getTiles();
         for (const tile of tiles) {
-            const { tile: imgId, terrain, edge } = tile;
+            const { mapX, mapY, edge, terrain, minimapInfo } = tile;
             const tileSprite = this.getTile(tile);
             if (!tileSprite) {
                 continue;
             }
             const [res, tileId] = tileSprite;
 
+            if (selectedZone && selectedZone.inArea(mapX, mapY) && (terrain & TERRAIN_CLEARABLE)) {
+                this.drawTile({
+                    ...tile,
+                    tileSize: 1
+                }, minimapInfo ===32 ? 'land1a_00252' : 'land1a_00253');
+                continue
+            }
 
-            if (edge & 0x40) {
+            if (edge & EDGE_OCCUPIED) {
                 // if (edge - 0x40 === 8) {
                 //     this.drawTile(tile, `${res}_${pad(6, 5)}`);
                 // } else {
@@ -37,28 +58,16 @@ class TerrainLayer extends AbstractLayer {
 
     getTile(tileObj) {
         const { tile, terrain } = tileObj;
-        // if (terrain & TERRAIN_SHRUB || terrain & TERRAIN_ROCK) {
-        //     this.drawTile(tileObj, `land1a_${pad(2, 5)}`);
+
+        // if (terrain & TERRAIN_ROAD) {
+        //     return ['land1a', tile - 545];
         // }
-
-        // commerce - 00001 - 00167 - 167
-        // entertainment - 00001 - 00116 - 116
-        // housng1a - 00001 - 00050 - 50
-        // land1a - 00001 - 00303 - 303
-        // land2a - 00001 - 00231 - 231
-        // land3a - 00043 - 00092 - 50
-        // plateau - 00001 - 00044 - 44
-        // plaza - 03139 - 03144 - 6
-        // security - 00001 - 00061 - 61
-        // transport - 00001 - 00093 - 93
-        // utilitya - 00001 - 00057 - 57
-        // well - 00001 - 00004 - 4
-
-
-        /// 00001 -
-        /// 00244 - land1a
-        /// 00779 - land2a
-        /// 00871 - land3a
+        //
+        // for (const group of GROUPS) {
+        //     if (tile >= group.start && tile <= group.start + group.count) {
+        //         return [group.id, tile - group.start];
+        //     }
+        // }
 
         if (terrain & TERRAIN_ROAD) {
             // console.info(imgId)
@@ -90,12 +99,12 @@ class TerrainLayer extends AbstractLayer {
         } else if( tile < 871) {
             return ['land3a', tile - 778];
         } else if( tile < 2900) {
-            // return ['housng1a', tile - 2829];
+            return ['housng1a', tile - 2829];
         } else {
-            // if (tile === 0xb10 || tile === 0xb0d)
-            // {
-            //     return ['housng1a', 51];
-            // }
+            if (tile === 0xb10 || tile === 0xb0d)
+            {
+                return ['housng1a', 51];
+            }
             // return ['land1a', 1];
         }
     }

@@ -1,6 +1,7 @@
 import AbstractLayer from './AbstractLayer.mjs';
 import { pad } from '../helpers/math.mjs';
 import {
+    EDGE_OCCUPIED,
     TERRAIN_GARDEN,
     TERRAIN_MEADOW,
     TERRAIN_ROAD,
@@ -15,14 +16,13 @@ class NatureLayer extends AbstractLayer {
         const tiles = this.map.getTiles();
         for (const tile of tiles) {
             const { tile: imgId, terrain, edge } = tile;
+            if (!(edge & EDGE_OCCUPIED)) {
+                continue;
+            }
             const [res, tileId] = this.getTile(tile);
 
-            if (terrain & TERRAIN_TREE || terrain & TERRAIN_GARDEN) {
-                // if (edge - 0x40 === 8) {
-                //     this.drawTile(tile, `${res}_${pad(6, 5)}`);
-                // } else {
-                    this.drawTile(tile, `${res}_${pad(tileId, 5)}`);
-                // }
+            if (terrain & TERRAIN_TREE || terrain & TERRAIN_GARDEN || terrain & TERRAIN_SHRUB || terrain & TERRAIN_ROCK) {
+                this.drawTile(tile, `${res}_${pad(tileId, 5)}`);
             }
         }
     }

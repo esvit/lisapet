@@ -22,6 +22,10 @@ export const DIRECTION_EAST = 2;
 export const DIRECTION_SOUTH = 4;
 export const DIRECTION_WEST = 8;
 
+/**
+ * Опис типів місцевості, згідно з https://esvit.notion.site/Caesar-3-Terrain-Elements-b19e64fa5ec3443d95ff34a4dc842760
+ * @type {number}
+ */
 export const TERRAIN_TREE = 1;
 export const TERRAIN_ROCK = 2;
 export const TERRAIN_WATER = 4;
@@ -49,7 +53,7 @@ export const TERRAIN_NOT_CLEAR = TERRAIN_TREE | TERRAIN_ROCK | TERRAIN_WATER | T
                                 | TERRAIN_GARDEN | TERRAIN_ROAD | TERRAIN_AQUEDUCT | TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP
                                 | TERRAIN_RUBBLE | TERRAIN_WALL | TERRAIN_GATEHOUSE;
 // 0xd17f
-export const TERRAIN_CLEARABLE  = TERRAIN_TREE | TERRAIN_ROCK | TERRAIN_WATER | TERRAIN_BUILDING | TERRAIN_SHRUB
+export const TERRAIN_CLEARABLE  = TERRAIN_TREE | TERRAIN_BUILDING | TERRAIN_SHRUB
                                 | TERRAIN_GARDEN | TERRAIN_ROAD | TERRAIN_AQUEDUCT
                                 | TERRAIN_RUBBLE | TERRAIN_WALL | TERRAIN_GATEHOUSE;
 
@@ -76,3 +80,13 @@ export const TERRAIN_TYPES = [
     { id: TERRAIN_WALL, title: 'Wall' },
     { id: TERRAIN_GATEHOUSE, title: 'Gatehouse' },
 ];
+
+// розміри спрайтів, зберігаються в minimapInfo
+export const TILE_SIZE_1X = 0;
+export const TILE_SIZE_2X = 1;
+export const TILE_SIZE_3X = 2;
+
+
+export const TOOLS_HOUSE = 'house';
+export const TOOLS_SHOVEL = 'shovel';
+export const TOOLS_ROAD = 'road';

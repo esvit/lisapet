@@ -65,17 +65,12 @@ class GridLayer extends AbstractLayer {
         this.drawingContext.drawText('E', wrX - this.map.tileWidth, wrY + this.map.tileHeight * 4, { color: "#fff" });
 
         if (this.#selectedTile) {
-            const res = toCordinates(this.#selectedTile[0], this.#selectedTile[1]);
+            const res = this.drawColorTile(this.#selectedTile[0], this.#selectedTile[1], 'red');
             if (res) {
-                const [x, y] = res;
-                this.drawingContext.ctx.fillStyle = 'red';
-                this.drawingContext.ctx.beginPath();
-                this.drawingContext.ctx.moveTo(x, y);
-                this.drawingContext.ctx.lineTo(x - halfTileWidth, y + halfTileHeight);
-                this.drawingContext.ctx.lineTo(x, y + tileHeight);
-                this.drawingContext.ctx.lineTo(x + halfTileWidth, y + halfTileHeight);
-                this.drawingContext.ctx.fill();
-                this.drawingContext.drawText(`(${this.#selectedTile[0]},${this.#selectedTile[1]})`, x - halfTileWidth, y + halfTileHeight, { color: '#fff', size: 10 });
+                this.drawingContext.drawText(`(${this.#selectedTile[0]},${this.#selectedTile[1]})`, res[0] - halfTileWidth, res[1] + halfTileHeight, {
+                    color: '#fff',
+                    size: 10
+                });
             }
         }
     }

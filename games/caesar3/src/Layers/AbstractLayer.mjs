@@ -36,4 +36,24 @@ class AbstractLayer {
             // }
         }
     }
+
+    drawColorTile(mapX, mapY, color) {
+        const { tileHeight, tileWidth } = this.map;
+        const halfTileWidth = tileWidth / 2;
+        const halfTileHeight = tileHeight / 2;
+        const res = this.map.toCordinates(mapX, mapY);
+        if (!res) {
+            return;
+        }
+        const [x, y] = res;
+        const ctx = this.drawingContext.ctx;
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x - halfTileWidth, y + halfTileHeight);
+        ctx.lineTo(x, y + tileHeight);
+        ctx.lineTo(x + halfTileWidth, y + halfTileHeight);
+        ctx.fill();
+        return [x, y];
+    }
 }

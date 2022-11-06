@@ -8,10 +8,10 @@ describe('AbstractLayer', () => {
         layer.resourceManager = { getByAtlas: () => ([null, 0, 0, 58, 30]) };
         layer.drawingContext = {
             drawSprite: (img, srcX, srcY, srcW, srcH, drawX, drawY, drawW, drahH) => {
-                expect([drawX, drawY, drawW, drahH]).toEqual([15, 15, 58, 30]);
+                expect([drawX, drawY, drawW, drahH]).toEqual([-14, 15, 58, 30]);
             }
         };
-        let tile = { drawX: 15, drawY: 15, drawW: 58, drawH: 30 };
+        let tile = { drawX: 15, drawY: 15, drawW: 58, drawH: 30, tileSize: 1 };
         layer.drawTile(tile, 'name1');
 
         // layer.resourceManager = { getByAtlas: () => ([null, 0, 0, 118, 76]) };
@@ -26,7 +26,7 @@ describe('AbstractLayer', () => {
         layer.resourceManager = { getByAtlas: () => ([null, 0, 0, 58, 53]) };
         layer.drawingContext = {
             drawSprite: (img, srcX, srcY, srcW, srcH, drawX, drawY, drawW, drahH) => {
-                expect([drawX, drawY, drawW, drahH]).toEqual([15, -8, 58, 53]);
+                expect([drawX, drawY, drawW, drahH]).toEqual([-14, -8, 58, 53]);
             }
         };
         tile = { drawX: 15, drawY: 15, drawW: 58, drawH: 30 };
@@ -35,7 +35,7 @@ describe('AbstractLayer', () => {
         layer.resourceManager = { getByAtlas: () => ([null, 0, 0, 58, 49]) };
         layer.drawingContext = {
             drawSprite: (img, srcX, srcY, srcW, srcH, drawX, drawY, drawW, drahH) => {
-                expect([drawX, drawY, drawW, drahH]).toEqual([15, 15, 58, 49]);
+                expect([drawX, drawY, drawW, drahH]).toEqual([-14, -4, 58, 49]);
             }
         };
         tile = { drawX: 15, drawY: 15, drawW: 58, drawH: 30 };

@@ -1,50 +1,61 @@
 import Map from './Map.mjs';
 
 describe('test', () => {
+    const WIDTH = 20;
+    const HEIGHT = 10;
     const di = {
         scope: () => ({
             set: () => {},
             get: () => {}
         })
     };
+    let map;
 
-    test('toCordinates', () => {
-        const WIDTH = 20;
-        const HEIGHT = 10;
-        const map = new Map(di, {}, WIDTH, HEIGHT);
+    beforeEach(() => {
+        map = new Map(di, {
+            mapWidth: 160,
+            tileId: [],
+            terrainInfo: [],
+            heightInfo: [],
+            edgeData: []
+        }, WIDTH, HEIGHT);
         map.mapWidth = 160;
         map.halfSize = 80;
+        map.initMap();
+    });
 
+    test('toCordinates', () => {
         expect(map.toCordinates(0, 0)).toEqual([1620, 10, WIDTH, HEIGHT]);
-        expect(map.toCordinates(0, 160)).toEqual([20, 810, WIDTH, HEIGHT]);
-        expect(map.toCordinates(1, 160)).toEqual([30, 815, WIDTH, HEIGHT]);
-        expect(map.toCordinates(2, 160)).toEqual([40, 820, WIDTH, HEIGHT]);
         expect(map.toCordinates(0, 159)).toEqual([30, 805, WIDTH, HEIGHT]);
         expect(map.toCordinates(1, 159)).toEqual([40, 810, WIDTH, HEIGHT]);
-        expect(map.toCordinates(160, 0)).toEqual([3220, 810, WIDTH, HEIGHT]);
-        expect(map.toCordinates(160, 160)).toEqual([1620, 1610, WIDTH, HEIGHT]);
+        expect(map.toCordinates(2, 159)).toEqual([50, 815, WIDTH, HEIGHT]);
+        expect(map.toCordinates(0, 159)).toEqual([30, 805, WIDTH, HEIGHT]);
+        expect(map.toCordinates(1, 159)).toEqual([40, 810, WIDTH, HEIGHT]);
+        expect(map.toCordinates(159, 0)).toEqual([3210, 805, WIDTH, HEIGHT]);
+        expect(map.toCordinates(159, 159)).toEqual([1620, 1600, WIDTH, HEIGHT]);
     });
 
     test('fromCordinates', () => {
-        const WIDTH = 20;
-        const HEIGHT = 10;
-        const map = new Map(di, {}, WIDTH, HEIGHT);
-        map.mapWidth = 160;
-        map.halfSize = 80;
-
-        expect(map.fromCordinates(3220, 795)).toEqual(null);
-        expect(map.fromCordinates(1620, 10)).toEqual([0, 0]);
-        expect(map.fromCordinates(20, 810)).toEqual([0, 160]);
-        expect(map.fromCordinates(3220, 810)).toEqual([160, 0]);
-        expect(map.fromCordinates(1620, 1610)).toEqual([160, 160]);
+        expect(map.fromCordinates(3210, 805)).toEqual(null);
+        expect(map.fromCordinates(1620, 10)).toEqual(null);
+        expect(map.fromCordinates(30, 805)).toEqual([87, 134]);
+        expect(map.fromCordinates(3220, 810)).toEqual(null);
+        expect(map.fromCordinates(1620, 1610)).toEqual(null);
     });
 
     test('fromCordinates zoom', () => {
         const WIDTH = 58;
         const HEIGHT = 30;
-        const map = new Map(di, {}, WIDTH, HEIGHT);
+        const map = new Map(di, {
+            mapWidth: 160,
+            tileId: [],
+            terrainInfo: [],
+            heightInfo: [],
+            edgeData: []
+        }, WIDTH, HEIGHT);
         map.mapWidth = 160;
         map.halfSize = 80;
+        map.initMap();
         let zoom = 1;
         Object.defineProperty(map, 'windowWidth', { get: () => 1636 });
         Object.defineProperty(map, 'windowHeight', { get: () => 495 });
@@ -98,6 +109,7 @@ describe('test', () => {
         const map = new Map(di, mapData, WIDTH, HEIGHT);
         map.mapWidth = 160;
         map.halfSize = 80;
+        map.initMap();
 
         expect(map.getNeighbors(80, 80)).toEqual([
             {

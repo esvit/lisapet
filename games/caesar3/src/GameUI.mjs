@@ -1,12 +1,19 @@
 import {LAYER_TERRAIN, LAYERS} from './constants.mjs';
+import EventEmitter from '../../../src/EventEmitter.mjs';
 
 export default
-class GameUI {
+class GameUI extends EventEmitter {
     #menuOverlays = null;
+
     #menuBuildings = null;
+
     #map = null;
 
+    #selectedTool = null;
+
     constructor() {
+        super();
+
         this.#menuOverlays = document.getElementById('menuOverlays');
         this.#menuBuildings = document.getElementById('menuBuildings');
 
@@ -40,6 +47,14 @@ class GameUI {
             btn.onclick = (e) => {
                 e.preventDefault();
                 this.toggleBuildings();
+            };
+        }
+        const emit = this.emit.bind(this);
+        for (const btn of document.querySelectorAll('[data-tool]')) {
+            btn.onclick = function (e) {
+                e.preventDefault();
+                const toolName = this.getAttribute('data-tool');
+                emit('tool', toolName);
             };
         }
     }
@@ -116,5 +131,9 @@ class GameUI {
             nodes.push(btn);
         }
         this.#menuOverlays.replaceChildren(...nodes);
+    }
+
+    selectTool(name) {
+
     }
 }
