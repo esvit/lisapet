@@ -7,6 +7,9 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
     <style>
+        html, body {
+            overscroll-behavior-x: none; /* відключає свайп двома пальцями на макосі */
+        }
         * {
             -webkit-touch-callout: none;
             -webkit-user-select: none;
@@ -180,7 +183,7 @@
                     <button class="btn btn-rotate-ccw"></button>
                 </div>
 
-                <div class="img-placeholder"></div>
+                <div class="img-placeholder" id="imgPlaceholder"></div>
 
                 <div class="build-buttons">
                     <button data-tool="house" class="btn icon-house"></button>

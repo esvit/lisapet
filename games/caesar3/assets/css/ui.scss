@@ -362,7 +362,17 @@
     background-position: -156px 0;
     width: 149px;
     height: 54px;
-    margin: 8px 3px 7px
+    margin: 8px 3px 7px;
+
+    &.tool-house {
+      background-position-y: -54px;
+    }
+    &.tool-shovel {
+      background-position-y: -108px;
+    }
+    &.tool-road {
+      background-position-y: -162px;
+    }
   }
 
   .map {

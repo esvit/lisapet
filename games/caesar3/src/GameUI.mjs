@@ -7,6 +7,12 @@ class GameUI extends EventEmitter {
 
     #menuBuildings = null;
 
+    /**
+     * Картинка, яка показує вибраний інструмент selectedAreaTool
+     * @type {Element}
+     */
+    #imgPlaceholder = null;
+
     #map = null;
 
     #selectedTool = null;
@@ -16,6 +22,7 @@ class GameUI extends EventEmitter {
 
         this.#menuOverlays = document.getElementById('menuOverlays');
         this.#menuBuildings = document.getElementById('menuBuildings');
+        this.#imgPlaceholder = document.getElementById('imgPlaceholder');
 
         this.addEvents();
     }
@@ -134,6 +141,6 @@ class GameUI extends EventEmitter {
     }
 
     selectTool(name) {
-
+        this.#imgPlaceholder.setAttribute('class', `img-placeholder tool-${name}`);
     }
 }

@@ -1,5 +1,4 @@
 import AbstractLayer from './AbstractLayer.mjs';
-import { pad } from '../helpers/math.mjs';
 import {
     TERRAIN_AQUEDUCT,
     TERRAIN_MEADOW,
@@ -17,9 +16,8 @@ class ColorLayer extends AbstractLayer {
         const tiles = this.map.getTiles();
         for (const tile of tiles) {
             const { mapX, mapY, terrain } = tile;
-            const [drawX, drawY] = this.map.toCordinates(mapX, mapY);
 
-            this.drawCell(drawX, drawY, this.getTerrainColor(terrain));
+            this.drawColorTile(mapX, mapY, this.getTerrainColor(terrain));
         }
     }
 
@@ -43,18 +41,5 @@ class ColorLayer extends AbstractLayer {
         // if (terrain & TERRAIN_GATEHOUSE) return 'blue';
         // if (terrain & TERRAIN_GATEHOUSE) return 'blue';
         return '#FF000066';
-    }
-
-    drawCell(x, y, color = 'red') {
-        const halfTileWidth = this.map.tileWidth / 2;
-        const halfTileHeight = this.map.tileHeight / 2;
-
-        this.drawingContext.ctx.fillStyle = color;
-        this.drawingContext.ctx.beginPath();
-        this.drawingContext.ctx.moveTo(x, y);
-        this.drawingContext.ctx.lineTo(x - halfTileWidth, y + halfTileHeight);
-        this.drawingContext.ctx.lineTo(x, y + this.map.tileHeight);
-        this.drawingContext.ctx.lineTo(x + halfTileWidth, y + halfTileHeight);
-        this.drawingContext.ctx.fill();
     }
 }

@@ -1,5 +1,6 @@
 import Scene from '../../../../src/Scene.mjs';
 import { moveMapNearBorder, outMapNearBorder } from '../helpers/moveMapNearBorder.mjs';
+import {MOUSE_RIGHT_BUTTON} from "../../../../src/InputManager.mjs";
 
 const NORTH_ATLAS = 'atlases/north1.atlas';
 const MAIN_ATLAS = 'atlases/main1.atlas';
@@ -46,6 +47,20 @@ class GameScene extends Scene {
         this.#gameUI.bind(val);
     }
 
+    get selectedTool() {
+        return this.#selectedTool;
+    }
+
+    set selectedTool(name) {
+        this.#gameUI.selectTool(name);
+        this.#map.selectedAreaTool = name;
+        this.#selectedTool = name;
+        if (!name) {
+            this.#mouseSelectArea = null;
+            this.#map.selectedArea = null;
+        }
+    }
+
     async loading() {
         // await this.resourceManager.loadBatch([
         //   NORTH_ATLAS // завантажити перед основним
@@ -86,22 +101,24 @@ class GameScene extends Scene {
             this.#map.move(-e.deltaX, -e.deltaY);
         }, { passive: false });
         this.#gameUI.on('tool', (name) => {
-            this.#selectedTool = name;
+            this.selectedTool = name;
         })
     }
 
     click({ x, y }) {
-        // const [mapX, mapY] = this.#map.fromCordinates(x, y);
-        // const terrainInfo = this.#map.getTerrainInfo(mapX, mapY)
-        // const { tile, edge, minimapInfo, elevation } = this.#map.get(mapX, mapY)
-        // this.#gameUI.showTerrainInfoDialog({
-        //     ...terrainInfo,
-        //     tile,
-        //     edge,
-        //     elevation,
-        //     minimapInfo,
-        //     mapX, mapY
-        // });
+        if (!this.#map.selectedAreaTool) {
+            const [mapX, mapY] = this.#map.fromCordinates(x, y);
+            const terrainInfo = this.#map.getTerrainInfo(mapX, mapY)
+            const {tile, edge, minimapInfo, elevation} = this.#map.get(mapX, mapY)
+            this.#gameUI.showTerrainInfoDialog({
+                ...terrainInfo,
+                tile,
+                edge,
+                elevation,
+                minimapInfo,
+                mapX, mapY
+            });
+        }
     }
 
     move({ x, y }) {
@@ -127,21 +144,28 @@ class GameScene extends Scene {
         outMapNearBorder();
     }
 
-    mousedown({ x, y }) {
-        this.#mouseSelectArea = [
-            [x, y],
-            [null, null]
-        ];
-        this.mouseUpHandler = this.mouseup.bind(this);
-        window.addEventListener('mouseup', this.mouseUpHandler);
+    mousedown({ x, y, button, stop }) {
+        if (button === MOUSE_RIGHT_BUTTON) { // відловити в кліку це не можна, бо показує контексне меню
+            this.selectedTool = null;
+            stop();
+            return;
+        }
+        if (this.#map.selectedAreaTool) {
+            this.#mouseSelectArea = [
+                [x, y],
+                [null, null]
+            ];
+            this.mouseUpHandler = this.mouseup.bind(this);
+            window.addEventListener('mouseup', this.mouseUpHandler);
+        }
     }
 
     mouseup(e) {
         if (this.#map.selectedArea) {
             this.#map.clearMapArea(this.#map.selectedArea);
-            this.#map.selectedArea = null;
-            this.#mouseSelectArea = null;
         }
+        this.#map.selectedArea = null;
+        this.#mouseSelectArea = null;
         if (this.mouseUpHandler) {
             window.removeEventListener('mouseup', this.mouseUpHandler);
             this.mouseUpHandler = null;
