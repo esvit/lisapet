@@ -29,6 +29,14 @@ export default class Area {
         return this.#end;
     }
 
+    get startPoint() {
+        return this.#startPoint;
+    }
+
+    get endPoint() {
+        return this.#endPoint;
+    }
+
     inArea(x, y) {
         if (x < this.#start[0] || x > this.#end[0]) {
             return false;
@@ -40,8 +48,8 @@ export default class Area {
     }
 
     * getCoordinates() {
-        for (let x = this.#start[0]; x < this.#end[0]; x++) {
-            for (let y = this.#start[1]; y < this.#end[1]; y++) {
+        for (let x = this.#start[0]; x <= this.#end[0]; x++) {
+            for (let y = this.#start[1]; y <= this.#end[1]; y++) {
                 yield [x, y];
             }
         }

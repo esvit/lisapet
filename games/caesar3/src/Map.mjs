@@ -14,7 +14,7 @@ import {
     EDGE_OCCUPIED,
     TILE_SIZE_2X,
     TILE_SIZE_3X,
-    TERRAIN_CLEARABLE, TERRAIN_NONE
+    TERRAIN_CLEARABLE, TERRAIN_NONE, TOOLS_SHOVEL, TOOLS_HOUSE, TERRAIN_BUILDING
 } from './constants.mjs';
 import GridLayer from './Layers/GridLayer.mjs';
 import { createOffscreenCanvas } from './helpers/offscreenCanvas.mjs';
@@ -431,17 +431,13 @@ class Map {
         }
     }
 
-    clearMapArea([start, end]) {
+    applyTool([start, end], tool) {
         const area = new Area(start, end);
         const coordinates = area.getCoordinates();
         for (const [x, y] of coordinates) {
-            const { terrain } = this.get(x, y);
-            if (terrain & TERRAIN_CLEARABLE) {
-                this.set(x, y, {
-                    tileId: 499,
-                    terrain: TERRAIN_NONE
-                });
-            }
+            const tile = this.get(x, y);
+            tool.changeCell(this, x, y, tile);
         }
+        this.#layers[LAYER_ROAD].rebuildTiles();
     }
 }

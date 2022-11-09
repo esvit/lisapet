@@ -1,8 +1,8 @@
 import AbstractLayer from './AbstractLayer.mjs';
 import { pad } from '../helpers/math.mjs';
 import {
-    EDGE_OCCUPIED, TERRAIN_CLEARABLE,
-    TERRAIN_ROAD
+    EDGE_OCCUPIED, TERRAIN_CLEARABLE, TERRAIN_NONE,
+    TERRAIN_ROAD, TOOLS_HOUSE, TOOLS_SHOVEL
 } from '../constants.mjs';
 import Area from "../Area.mjs";
 
@@ -26,20 +26,22 @@ class TerrainLayer extends AbstractLayer {
     drawLayer() {
         const selectedZone = this.map.selectedArea ? new Area(...this.map.selectedArea) : null;
         const tiles = this.map.getTiles();
+        const tool = this.map.selectedAreaTool;
+        if (tool && selectedZone) {
+            tool.prepareArea(this.map, selectedZone);
+        }
         for (const tile of tiles) {
-            const { mapX, mapY, edge, terrain, minimapInfo } = tile;
+            const { mapX, mapY, edge, terrain } = tile;
             const tileSprite = this.getTile(tile);
             if (!tileSprite) {
                 continue;
             }
             const [res, tileId] = tileSprite;
 
-            if (selectedZone && selectedZone.inArea(mapX, mapY) && (terrain & TERRAIN_CLEARABLE)) {
-                this.drawTile({
-                    ...tile,
-                    tileSize: 1
-                }, minimapInfo ===32 ? 'land1a_00252' : 'land1a_00253');
-                continue
+            if (tool && selectedZone && selectedZone.inArea(mapX, mapY)) {
+                if (tool.drawPreviewCell(this, mapX, mapY, tile)) {
+                    continue;
+                }
             }
 
             if (edge & EDGE_OCCUPIED) {

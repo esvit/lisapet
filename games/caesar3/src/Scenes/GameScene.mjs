@@ -1,6 +1,10 @@
 import Scene from '../../../../src/Scene.mjs';
 import { moveMapNearBorder, outMapNearBorder } from '../helpers/moveMapNearBorder.mjs';
 import {MOUSE_RIGHT_BUTTON} from "../../../../src/InputManager.mjs";
+import {TOOLS_HOUSE, TOOLS_ROAD, TOOLS_SHOVEL} from "../constants.mjs";
+import Shovel from '../Tools/Shovel.mjs';
+import House from '../Tools/House.mjs';
+import Road from '../Tools/Road.mjs';
 
 const NORTH_ATLAS = 'atlases/north1.atlas';
 const MAIN_ATLAS = 'atlases/main1.atlas';
@@ -28,6 +32,8 @@ class GameScene extends Scene {
      */
     #selectedTool = null;
 
+    #tools = {};
+
     constructor({ canvas, DrawingContext, ResourceManager, InputManager, GameUI }) {
         super();
 
@@ -36,6 +42,12 @@ class GameScene extends Scene {
         this.#resourceManager = ResourceManager;
         this.#inputManager = InputManager;
         this.#gameUI = GameUI;
+
+        this.#tools = {
+            [TOOLS_HOUSE]: new House(),
+            [TOOLS_SHOVEL]: new Shovel(),
+            [TOOLS_ROAD]: new Road(),
+        };
     }
 
     get map() {
@@ -51,10 +63,10 @@ class GameScene extends Scene {
         return this.#selectedTool;
     }
 
-    set selectedTool(name) {
-        this.#gameUI.selectTool(name);
-        this.#map.selectedAreaTool = name;
-        this.#selectedTool = name;
+    set selectedTool(tool) {
+        this.#gameUI.selectTool(tool ? tool.name : null);
+        this.#map.selectedAreaTool = tool;
+        this.#selectedTool = tool;
         if (!name) {
             this.#mouseSelectArea = null;
             this.#map.selectedArea = null;
@@ -101,7 +113,7 @@ class GameScene extends Scene {
             this.#map.move(-e.deltaX, -e.deltaY);
         }, { passive: false });
         this.#gameUI.on('tool', (name) => {
-            this.selectedTool = name;
+            this.selectedTool = this.#tools[name];
         })
     }
 
@@ -162,7 +174,7 @@ class GameScene extends Scene {
 
     mouseup(e) {
         if (this.#map.selectedArea) {
-            this.#map.clearMapArea(this.#map.selectedArea);
+            this.#map.applyTool(this.#map.selectedArea, this.#selectedTool);
         }
         this.#map.selectedArea = null;
         this.#mouseSelectArea = null;
