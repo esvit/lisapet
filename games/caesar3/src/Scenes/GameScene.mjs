@@ -1,16 +1,21 @@
 import Scene from '../../../../src/Scene.mjs';
 import { moveMapNearBorder, outMapNearBorder } from '../helpers/moveMapNearBorder.mjs';
 import {MOUSE_RIGHT_BUTTON} from "../../../../src/InputManager.mjs";
-import {TOOLS_HOUSE, TOOLS_ROAD, TOOLS_SHOVEL} from "../constants.mjs";
+import { TOOLS_HOUSE, TOOLS_ROAD, TOOLS_SHOVEL } from '../constants.mjs';
 import Shovel from '../Tools/Shovel.mjs';
 import House from '../Tools/House.mjs';
 import Road from '../Tools/Road.mjs';
+import ImmigrantWalker from "../Walkers/ImmigrantWalker.mjs";
 
 const NORTH_ATLAS = 'atlases/north1.atlas';
 const MAIN_ATLAS = 'atlases/main1.atlas';
+const CITIZEN1_ATLAS = 'atlases/citizen1.atlas';
+const CARTS_ATLAS = 'atlases/carts.atlas';
 
 export default
 class GameScene extends Scene {
+    #di = null;
+
     #map = null;
 
     #canvas = null;
@@ -34,9 +39,14 @@ class GameScene extends Scene {
 
     #tools = {};
 
-    constructor({ canvas, DrawingContext, ResourceManager, InputManager, GameUI }) {
+    #walkers = [];
+
+    #mapImage = null;
+
+    constructor({ di, canvas, DrawingContext, ResourceManager, InputManager, GameUI }) {
         super();
 
+        this.#di = di;
         this.#canvas = canvas;
         this.#drawingContext = DrawingContext;
         this.#resourceManager = ResourceManager;
@@ -56,6 +66,7 @@ class GameScene extends Scene {
 
     set map(val) {
         this.#map = val;
+        this.#mapImage = null;
         this.#gameUI.bind(val);
     }
 
@@ -78,7 +89,9 @@ class GameScene extends Scene {
         //   NORTH_ATLAS // завантажити перед основним
         // ]);
         await this.#resourceManager.loadBatch([
-            MAIN_ATLAS
+            MAIN_ATLAS,
+            CITIZEN1_ATLAS,
+            CARTS_ATLAS
         ]);
         this.resume();
     }
@@ -88,9 +101,12 @@ class GameScene extends Scene {
             return;
         }
 
-        const image = this.#map.redraw();
+        if (!this.#mapImage) {
+            const image = this.#map.redraw();
+            this.#mapImage = image;
+        }
         const [offsetX, offsetY] = this.#map.mapOffset;
-        this.#drawingContext.drawImage(image, offsetX, offsetY, this.#map.drawWidth, this.#map.drawHeight);
+        this.#drawingContext.drawImage(this.#mapImage, offsetX, offsetY, this.#map.drawWidth, this.#map.drawHeight);
     }
 
     pause() {
@@ -114,22 +130,25 @@ class GameScene extends Scene {
         }, { passive: false });
         this.#gameUI.on('tool', (name) => {
             this.selectedTool = this.#tools[name];
-        })
+        });
+
+        setInterval(() => {
+            if (!this.#map) {
+                return;
+            }
+            this.#map.tick()
+        }, 10);
+        setInterval(() => {
+            if (!this.#map) {
+                return;
+            }
+            const image = this.#map.redraw();
+            this.#mapImage = image;
+        }, 100);
     }
 
     click({ x, y }) {
         if (!this.#map.selectedAreaTool) {
-            const [mapX, mapY] = this.#map.fromCordinates(x, y);
-            const terrainInfo = this.#map.getTerrainInfo(mapX, mapY)
-            const {tile, edge, minimapInfo, elevation} = this.#map.get(mapX, mapY)
-            this.#gameUI.showTerrainInfoDialog({
-                ...terrainInfo,
-                tile,
-                edge,
-                elevation,
-                minimapInfo,
-                mapX, mapY
-            });
         }
     }
 
@@ -156,10 +175,25 @@ class GameScene extends Scene {
         outMapNearBorder();
     }
 
-    mousedown({ x, y, button, stop }) {
+    mousedown({ x, y, button }) {
         if (button === MOUSE_RIGHT_BUTTON) { // відловити в кліку це не можна, бо показує контексне меню
-            this.selectedTool = null;
             stop();
+            if (this.selectedTool === null) {
+                const [mapX, mapY] = this.#map.fromCordinates(x, y);
+                const terrainInfo = this.#map.getTerrainInfo(mapX, mapY)
+                const {tile, edge, minimapInfo, elevation} = this.#map.get(mapX, mapY)
+
+                this.#gameUI.showTerrainInfoDialog({
+                    ...terrainInfo,
+                    tile,
+                    edge,
+                    elevation,
+                    minimapInfo,
+                    mapX, mapY
+                });
+            } else {
+                this.selectedTool = null;
+            }
             return;
         }
         if (this.#map.selectedAreaTool) {

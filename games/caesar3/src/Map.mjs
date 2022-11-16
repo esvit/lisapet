@@ -30,7 +30,7 @@ const TILE_HEIGHT = 30;
 
 export default
 class Map {
-    #di = null;
+    di = null;
 
     #mapData = null;
 
@@ -71,7 +71,7 @@ class Map {
                               // - TOOLS_HOUSE - показує як будуть виглядати зайняті клітинки будинками
 
     constructor(di, mapData, tileWidth = TILE_WIDTH, tileHeight = TILE_HEIGHT) {
-        this.#di = di;
+        this.di = di;
         this.#mapData = mapData;
         this.#tileWidth = tileWidth;
         this.#tileHeight = tileHeight;
@@ -118,10 +118,9 @@ class Map {
             MAP_SIZE_AND_BORDER * this.#tileWidth,
             MAP_SIZE_AND_BORDER * this.#tileHeight
         );
-        console.info(MAP_SIZE_AND_BORDER * this.#tileWidth, MAP_SIZE_AND_BORDER * this.#tileHeight)
         this.#context = new DrawingContext({ canvas: this.#canvas });
 
-        const scope = this.#di.scope();
+        const scope = this.di.scope();
         scope.set('canvas', this.#canvas);
         scope.set('DrawingContext', new DrawingContext({ canvas: this.#canvas }));
 
@@ -274,6 +273,10 @@ class Map {
         return [mapX, mapY];
     }
 
+    draw(ctx) {
+        // abstract
+    }
+
     redraw() {
         this.#context.clear('#000');
         for (const layerKey in this.#layers) {
@@ -283,6 +286,7 @@ class Map {
             }
             layer.drawLayer();
         }
+        this.draw(this.#context);
         // if (this.#layers & LAYER_TERRAIN) {
         //     this.terrainLayer.drawLayer();
         // }
@@ -347,6 +351,9 @@ class Map {
     getOffset(mapX, mapY) {
         if (mapX < 0 || mapY < 0 || mapX > this.size + 1 || mapY > this.size + 1) {
             return null;
+        }
+        if (this.mapBorder === null) {
+            throw new Error('Call initMap first');
         }
         const x = mapX + this.mapBorder + 1; // відступити 1 комірку границі
         const y = mapY + this.mapBorder + 1;

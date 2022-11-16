@@ -242,8 +242,9 @@
     import InputManager from '/src/InputManager.mjs';
     import MapReader from './src/MapReader.mjs';
     import GameUI from './src/GameUI.mjs';
-    import Map from './src/Map.mjs';
+    import WalkersMap from './src/WalkersMap.mjs';
     import GameScene from './src/Scenes/GameScene.mjs';
+    import ImmigrantWalker from './src/Walkers/ImmigrantWalker.mjs';
 
     async function bootstrap() {
         const di = DependencyInjection.createRoot({
@@ -263,9 +264,9 @@
         drawingContext.bindToElement(document.getElementById('mapContainer'));
         drawingContext.loop();
 
-        scene.map = new Map(di, {});
-        scene.map.visibleAreaSize = [drawingContext.width, drawingContext.height];
-        scene.map.initDebugMap();
+        // scene.map = new WalkersMap(di, {});
+        // scene.map.visibleAreaSize = [drawingContext.width, drawingContext.height];
+        // scene.map.initDebugMap();
         mainCanvas.addEventListener('dragover', function(e) {
             e.stopPropagation();
             e.preventDefault();
@@ -280,7 +281,7 @@
 
             reader.onload = function({ target }) {
                 const mapData = new MapReader(target.result);
-                scene.map = new Map(di, mapData);
+                scene.map = new WalkersMap(di, mapData);
                 scene.map.visibleAreaSize = [drawingContext.width, drawingContext.height];
                 scene.map.initMap();
             }

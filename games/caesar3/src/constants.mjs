@@ -90,3 +90,16 @@ export const TILE_SIZE_3X = 2;
 export const TOOLS_HOUSE = 'house';
 export const TOOLS_SHOVEL = 'shovel';
 export const TOOLS_ROAD = 'road';
+
+
+export const WALKER_DIRECTION_NORTH = 1;
+export const WALKER_DIRECTION_NORTH_EAST = 2;
+export const WALKER_DIRECTION_EAST = 3;
+export const WALKER_DIRECTION_SOUTH_EAST = 4;
+export const WALKER_DIRECTION_SOUTH = 5;
+export const WALKER_DIRECTION_SOUTH_WEST = 6;
+export const WALKER_DIRECTION_WEST = 7;
+export const WALKER_DIRECTION_NORTH_WEST = 8;
+
+export const WALKER_CART_BEHIND = 0;
+export const WALKER_CART_FRONT = 1;

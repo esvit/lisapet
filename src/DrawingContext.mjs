@@ -107,8 +107,14 @@ class DrawingContext extends EventEmitter {
     this.ctx.strokeStyle = strokeStyle;
     this.ctx.beginPath();
     for (const line of lines) {
-      this.ctx.moveTo(line.x1, line.y1);
-      this.ctx.lineTo(line.x2, line.y2);
+      if (Array.isArray(line)) {
+        const [x1, y1, x2, y2] = line;
+        this.ctx.moveTo(x1, y1);
+        this.ctx.lineTo(x2, y2);
+      } else {
+        this.ctx.moveTo(line.x1, line.y1);
+        this.ctx.lineTo(line.x2, line.y2);
+      }
     }
     this.ctx.stroke();
     this.ctx.restore();

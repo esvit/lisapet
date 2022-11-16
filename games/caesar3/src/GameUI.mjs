@@ -54,6 +54,8 @@ class GameUI extends EventEmitter {
             btn.onclick = (e) => {
                 e.preventDefault();
                 this.toggleBuildings();
+
+                this.#map.addImmigrantWalker();
             };
         }
         const emit = this.emit.bind(this);
@@ -79,7 +81,9 @@ class GameUI extends EventEmitter {
     showDialog(id, values = {}) {
         const dialog = document.getElementById(id);
         this.bindValues(dialog, values);
-        dialog.show();
+        setTimeout(() => {
+            dialog.show();
+        }, 1); // потрібна затримка, бо коли правою кнопкою клацаєш, то приховується контексне меню, якщо без затримки, то буде відображатись
         const closeBtn = dialog.querySelector('[data-action="close"]');
         const hide = (e) => {
             e.preventDefault();
