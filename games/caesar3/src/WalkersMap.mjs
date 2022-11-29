@@ -1,6 +1,6 @@
 import Map from './Map.mjs';
 import { astar, Graph } from './helpers/astar.mjs';
-import {TERRAIN_NONE, TERRAIN_ROAD} from "./constants.mjs";
+import {TERRAIN_NONE, TERRAIN_ROAD} from './constants.mjs';
 import ImmigrantWalker from './Walkers/ImmigrantWalker.mjs';
 
 export default

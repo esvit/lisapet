@@ -23,6 +23,10 @@ class Cart {
     this.#resourceManager = di.get('ResourceManager');
   }
 
+  get cartSprite() {
+    return 1;
+  }
+
   get cartPosition() {
     return WALKER_CART_FRONT;
   }
@@ -37,7 +41,7 @@ class Cart {
 
   draw(ctx) {
     const { x, y, direction } = this.#walker;
-    const n = direction + 8 * 16; // 104
+    const n = direction + 8 * this.cartSprite; // 104
     const num = pad(n, 5);
     const [img, tileX, tileY, tileW, tileH] = this.#resourceManager.getByAtlas(`carts_${num}`);
 

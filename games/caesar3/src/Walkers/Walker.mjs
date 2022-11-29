@@ -11,8 +11,8 @@ import {
 
 const MOVING_MATRIX = {
   [WALKER_DIRECTION_NORTH]: [-0.7, 0.7],
-  [WALKER_DIRECTION_NORTH_EAST]: [1, 0],
-  [WALKER_DIRECTION_EAST]: [+0.7, +0.7],
+  [WALKER_DIRECTION_NORTH_EAST]: [-1, 0],
+  [WALKER_DIRECTION_EAST]: [0.7, -0.7],
   [WALKER_DIRECTION_SOUTH_EAST]: [0, +1],
   [WALKER_DIRECTION_SOUTH]: [0.7, -0.7],
   [WALKER_DIRECTION_SOUTH_WEST]: [-1, 0],
@@ -22,22 +22,17 @@ const MOVING_MATRIX = {
 
 // citizen01
 const WALKER_PLAIN_CITIZEN = 0;
-const WALKER_PLAIN_CITIZEN2 = 1; // блондинка
+const WALKER_BATH_WORKER = 1; // блондинка
 const WALKER_PRIEST = 2; // священик
-// const WALKER_PRIEST = 3; // ???? податки
-// const WALKER_PRIEST = 4; // укротитель
-// const WALKER_PRIEST = 5; // укротитель бє кнутом
-// const WALKER_PRIEST = 6; // податки
-// const WALKER_PRIEST = 7; // школьнік
-// const WALKER_PRIEST = 8; // продавчиня
-// const WALKER_PRIEST = 9; // ізвозчік
-// const WALKER_PRIEST = 10; // імігрант
-// const WALKER_PRIEST = 11; // інженер
-
-// citizen02
-// const WALKER_PRIEST = 0; // військовий
-// const WALKER_PRIEST = 1; // військовий
-// const WALKER_PRIEST = 2; // військовий
+const WALKER_TAXER = 3; // податківець
+const WALKER_GLADIATOR = 4; // градіатор
+// const WALKER_PRIEST = 5; // градіатор (удар кнутом)
+// const WALKER_TAXER = 6; // податки
+const WALKER_SCHOOL_CHILD = 7; // дитина зі школи
+const WALKER_MARKET_LADY = 8; // продавчиня
+const WALKER_WORKER = 9; // різноробочий
+const WALKER_IMMIGRANT = 10; // імігрант
+const WALKER_ENGINEER = 11; // інженер
 
 export default
 class Walker {
@@ -129,7 +124,7 @@ class Walker {
         (this.#cart.cartPosition === WALKER_CART_FRONT && !drawCartBehindFirst.includes(this.#direction))
       );
 
-    if (isCartFirst) {
+    if (isCartFirst && this.#cart) {
       this.#cart.draw(ctx);
     }
 
@@ -162,7 +157,7 @@ class Walker {
       ctx.drawRect(this.#path[0][0] + this.#map.tileWidth / 2, this.#path[0][1] + this.#map.tileHeight / 2, 5, 5, 'red');
     }
 
-    if (!isCartFirst) {
+    if (!isCartFirst && this.#cart) {
       this.#cart.draw(ctx);
     }
   }
@@ -194,7 +189,7 @@ class Walker {
     if (angleDeg > -180 && angleDeg < -135) {
       this.#direction = WALKER_DIRECTION_WEST;
     }
-    if (angleDeg > 0 && angleDeg < 45) {
+    if (angleDeg > 0 && angleDeg < 46) {
       this.#direction = WALKER_DIRECTION_NORTH_EAST;
     }
     if (angleDeg > 45 && angleDeg < 90) {
@@ -206,5 +201,6 @@ class Walker {
     if (angleDeg > 135 && angleDeg < 180) {
       this.#direction = WALKER_DIRECTION_SOUTH;
     }
+    console.info(angleDeg, this.#direction)
   }
 }
