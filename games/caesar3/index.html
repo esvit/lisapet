@@ -215,7 +215,9 @@
                             Tile: <span data-bind="tile"></span>,
                             Edge: <span data-bind="edge"></span>,
                             Minimap: <span data-bind="minimapInfo"></span>,
-                            Elevation: <span data-bind="elevation"></span>
+                            Elevation: <span data-bind="elevation"></span>,
+                            Random: <span data-bind="random"></span>,
+                            Tile size: <span data-bind="tileSize"></span>
                         </div>
                         <pre data-bind="terrainInfo"></pre>
                     </div>
@@ -264,9 +266,9 @@
         drawingContext.bindToElement(document.getElementById('mapContainer'));
         drawingContext.loop();
 
-        // scene.map = new WalkersMap(di, {});
-        // scene.map.visibleAreaSize = [drawingContext.width, drawingContext.height];
-        // scene.map.initDebugMap();
+        scene.map = new WalkersMap(di, {});
+        scene.map.visibleAreaSize = [drawingContext.width, drawingContext.height];
+        scene.map.initDebugMap();
         mainCanvas.addEventListener('dragover', function(e) {
             e.stopPropagation();
             e.preventDefault();

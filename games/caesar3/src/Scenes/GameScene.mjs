@@ -1,16 +1,11 @@
 import Scene from '../../../../src/Scene.mjs';
 import { moveMapNearBorder, outMapNearBorder } from '../helpers/moveMapNearBorder.mjs';
 import {MOUSE_RIGHT_BUTTON} from "../../../../src/InputManager.mjs";
-import { TOOLS_HOUSE, TOOLS_ROAD, TOOLS_SHOVEL } from '../constants.mjs';
+import { TOOLS_HOUSE, TOOLS_ROAD, TOOLS_SHOVEL, RESOURCE_ATLASES } from '../constants.mjs';
 import Shovel from '../Tools/Shovel.mjs';
 import House from '../Tools/House.mjs';
 import Road from '../Tools/Road.mjs';
 import ImmigrantWalker from "../Walkers/ImmigrantWalker.mjs";
-
-const NORTH_ATLAS = 'atlases/north1.atlas';
-const MAIN_ATLAS = 'atlases/main1.atlas';
-const CITIZEN1_ATLAS = 'atlases/citizen1.atlas';
-const CARTS_ATLAS = 'atlases/carts.atlas';
 
 export default
 class GameScene extends Scene {
@@ -88,11 +83,7 @@ class GameScene extends Scene {
         // await this.resourceManager.loadBatch([
         //   NORTH_ATLAS // завантажити перед основним
         // ]);
-        await this.#resourceManager.loadBatch([
-            MAIN_ATLAS,
-            CITIZEN1_ATLAS,
-            CARTS_ATLAS
-        ]);
+        await this.#resourceManager.loadBatch(RESOURCE_ATLASES);
         this.resume();
     }
 
@@ -137,7 +128,7 @@ class GameScene extends Scene {
                 return;
             }
             this.#map.tick()
-        }, 10);
+        }, 100);
         setInterval(() => {
             if (!this.#map) {
                 return;

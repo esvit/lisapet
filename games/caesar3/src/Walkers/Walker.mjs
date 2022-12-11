@@ -1,5 +1,6 @@
 import { pad } from '../helpers/math.mjs';
 import {
+  ANIMATION_SLIDES, MAX_ANIMATIONS_NUMBER, MAX_DIRECTION_NUMBER,
   WALKER_CART_BEHIND,
   WALKER_CART_FRONT,
   WALKER_DIRECTION_EAST,
@@ -128,16 +129,15 @@ class Walker {
       this.#cart.draw(ctx);
     }
 
-    const n = (this.#slide % 11) * 8 + this.#direction + (10 * 104); // 104
-    const num = pad(n, 5);
-    const [img, tileX, tileY, tileW, tileH] = this.#resourceManager.getByAtlas(`citizen01_${num}`);
+    const n = (this.#slide % ANIMATION_SLIDES) * MAX_DIRECTION_NUMBER + this.#direction + (this.spriteNumber * MAX_ANIMATIONS_NUMBER);
+    const [img, tileX, tileY, tileW, tileH] = this.#resourceManager.getByAtlas(`citizen01_${pad(n, 5)}`);
     ctx.drawSprite(
       img,
       tileX, tileY, tileW, tileH,
       x, y, tileW, tileH
     );
 
-    if (false) {
+    if (true) {
       const lines = [];
       let start = null;
       for (const point of this.#path) {
@@ -204,3 +204,11 @@ class Walker {
     console.info(angleDeg, this.#direction)
   }
 }
+
+
+
+
+
+
+
+

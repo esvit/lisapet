@@ -11,10 +11,8 @@ import {
     LAYER_COLOR,
     LAYER_NATURE,
     TERRAIN_TYPES,
-    EDGE_OCCUPIED,
     TILE_SIZE_2X,
     TILE_SIZE_3X,
-    TERRAIN_CLEARABLE, TERRAIN_NONE, TOOLS_SHOVEL, TOOLS_HOUSE, TERRAIN_BUILDING
 } from './constants.mjs';
 import GridLayer from './Layers/GridLayer.mjs';
 import { createOffscreenCanvas } from './helpers/offscreenCanvas.mjs';
@@ -56,7 +54,7 @@ class Map {
         [LAYER_GRID]: null,
     };
 
-    #enabledLayers = LAYER_TERRAIN | LAYER_ROAD;
+    #enabledLayers = LAYER_TERRAIN;
 
     #mapOffset = [0, 0];
 
@@ -90,6 +88,7 @@ class Map {
             edgeData: new Array(162 * 162),
             heightInfo: new Array(162 * 162),
             minimapInfo: new Array(162 * 162),
+            randomNumbers: new Array(162 * 162),
             mapWidth: 80,
             mapHeight: 80,
             peopleEntryPoint: [1, 1, 79,79]
@@ -101,11 +100,6 @@ class Map {
                 this.set(x, y, {tileId: i++, edgeData: 72 });
             }
         }
-        // this.set(0, 2, { tileId: 851, edgeData: 72 });
-        // this.set(1, 2, { tileId: 854, edgeData: 73 });
-        // this.set(0, 6, { tileId: 481, edgeData: 80 });
-        // this.set(2, 0, { tileId: 248, edgeData: 0x40 });
-        // this.set(5, 5, { tileId: 865, edgeData: 0x40 });
     }
 
     /**
@@ -166,6 +160,10 @@ class Map {
 
     get data() {
         return this.#mapData;
+    }
+
+    get layers() {
+        return this.#layers;
     }
 
     set zoom(val) {
@@ -391,6 +389,7 @@ class Map {
             tileSize,
             tile: this.#mapData.tileId[offset],
             terrain: this.#mapData.terrainInfo[offset],
+            random: this.#mapData.randomNumbers[offset],
             edge,
             elevation: this.#mapData.heightInfo[offset],
             minimapInfo

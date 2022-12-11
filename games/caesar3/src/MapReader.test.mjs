@@ -3,7 +3,7 @@ import MapReader from './MapReader.mjs';
 
 describe('MapReader', () => {
     test('First test case', () => {
-        const buffer = fs.readFileSync( `${process.cwd()}/games/caesar3/assets/maps/Brigantium.map`).toString('binary');
+        const buffer = fs.readFileSync(`${process.cwd()}/../assets/maps/Brigantium.map`).toString('binary');
         expect(buffer.length).toBe(211692);
 
         const map = new MapReader(buffer);

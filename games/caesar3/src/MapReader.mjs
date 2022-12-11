@@ -1,78 +1,13 @@
 import { MAP_SIZE_AND_BORDER } from './constants.mjs';
+import { STRUCT_TYPES } from './helpers/reader.mjs';
+import { PKStream } from './helpers/pkzip.mjs';
 
-function readType(size, isString = false) {
-    return function(length = 1, bigEndian = false) {
-        return function (buffer, offset = 0) {
-            let value = length === 1 ? 0 : [];
-            const sizeArr = length * size;
-
-            for (let i = 0; i < sizeArr; i += size) {
-                const startIndex = bigEndian ? size - 1 : 0;
-                const endIndex = bigEndian ? -1 : size;
-                const step = bigEndian ? -1 : +1;
-
-                let val = isString ? '' : 0;
-                for (let n = startIndex; n !== endIndex; n += step) {
-                    const position = offset + i + n;
-                    const char = isString ? buffer.charAt(position) : buffer.charCodeAt(position);
-                    if (isString) {
-                        if (char === '\x00') {
-                            break;
-                        }
-                        val += char;
-                    } else {
-                        if (Number.isNaN(char)) {
-                            val = undefined;
-                            break;
-                        }
-                        const pow = !bigEndian ? n : size - n - 1;
-                        val |= buffer.charCodeAt(position) << (8 * pow);
-                    }
-                }
-                if (Array.isArray(value)) {
-                    value.push(val);
-                } else {
-                    value = val;
-                }
-            }
-            if (isString) {
-                value = value.join('');
-            }
-            return { value, size: length * size };
-        }
-    }
-}
-
-export const STRUCT_TYPES = {
-    byte: readType(1),
-    char: readType(1, true),
-    short: readType(2),
-    int: readType(4)
-};
-
-const MAP_STRUCT = {
-    // 0x0	52488	Short grid, graphic IDs. Each ID corresponds to a different graphic element / building
-    tileId: STRUCT_TYPES.short(MAP_SIZE_AND_BORDER * MAP_SIZE_AND_BORDER),
-    // 0xcd08	26244	Byte grid, edge data
-    edgeData: STRUCT_TYPES.byte(MAP_SIZE_AND_BORDER * MAP_SIZE_AND_BORDER),
-
-    // 0x1338c	52488	Short grid, terrain data
-    terrainInfo: STRUCT_TYPES.short(MAP_SIZE_AND_BORDER * MAP_SIZE_AND_BORDER),
-
-    // 0x20094	26244	Byte grid, related to "randomness" in terrain. 00 or 20 (hex), 01 or 21 for 2x2 buildings, etc
-    minimapInfo: STRUCT_TYPES.byte(MAP_SIZE_AND_BORDER * MAP_SIZE_AND_BORDER),
-
-    // 0x26718	26244	Byte grid, random numbers used for, among others: merging houses, tile appearance, minimap colours
-    randomNumbers: STRUCT_TYPES.byte(MAP_SIZE_AND_BORDER * MAP_SIZE_AND_BORDER),
-
-    // 0x2cd9c	26244	Byte grid, indicates the elevation level: 0 for the "ground" level, 1 for the first elevation level, 2 for the second, and so on
-    heightInfo: STRUCT_TYPES.byte(MAP_SIZE_AND_BORDER * MAP_SIZE_AND_BORDER),
-
+const MAP_INFO = {
     // 0x33420  8    ????
     _u0: STRUCT_TYPES.byte(8),
 
     // 0x33428	8	Camera X and Y position, 4 byte integer each
-    cameraX: STRUCT_TYPES.int(1),
+    cameraX: STRUCT_TYPES.int(),
     cameraY: STRUCT_TYPES.int(),
 
     // 0x33430	2	Starting date, negative for BC
@@ -186,16 +121,87 @@ const MAP_STRUCT = {
     flotsamOn: STRUCT_TYPES.short()
 };
 
+const MAP_STRUCT = {
+    // 0x0	52488	Short grid, graphic IDs. Each ID corresponds to a different graphic element / building
+    tileId: STRUCT_TYPES.short(MAP_SIZE_AND_BORDER * MAP_SIZE_AND_BORDER),
+    // 0xcd08	26244	Byte grid, edge data
+    edgeData: STRUCT_TYPES.byte(MAP_SIZE_AND_BORDER * MAP_SIZE_AND_BORDER),
+
+    // 0x1338c	52488	Short grid, terrain data
+    terrainInfo: STRUCT_TYPES.short(MAP_SIZE_AND_BORDER * MAP_SIZE_AND_BORDER),
+
+    // 0x20094	26244	Byte grid, related to "randomness" in terrain. 00 or 20 (hex), 01 or 21 for 2x2 buildings, etc
+    minimapInfo: STRUCT_TYPES.byte(MAP_SIZE_AND_BORDER * MAP_SIZE_AND_BORDER),
+
+    // 0x26718	26244	Byte grid, random numbers used for, among others: merging houses, tile appearance, minimap colours
+    randomNumbers: STRUCT_TYPES.byte(MAP_SIZE_AND_BORDER * MAP_SIZE_AND_BORDER),
+
+    // 0x2cd9c	26244	Byte grid, indicates the elevation level: 0 for the "ground" level, 1 for the first elevation level, 2 for the second, and so on
+    heightInfo: STRUCT_TYPES.byte(MAP_SIZE_AND_BORDER * MAP_SIZE_AND_BORDER),
+
+    ...MAP_INFO
+};
+
 export default
 class MapReader {
     constructor(buffer) {
-        let offset = 0;
-        for (const key in MAP_STRUCT) {
-            // const start = offset.toString(16);
-            const { value, size } = MAP_STRUCT[key](buffer, offset);
-            offset += size;
-            this[key] = value;
-            // console.info(key, start, offset.toString(16))
+        const stream = new PKStream(buffer);
+        stream.seek(4); //
+
+        const type = stream.readInt();
+        if (type === 0x66) {
+            stream.seek(0);
+            this.readSavedMap(stream);
+        } else {
+            stream.seek(0);
+            this.readScenario(stream);
         }
+    }
+
+    readSavedMap(stream) {
+        stream.seek(8);
+        this.tileId = stream.readCompressedShorts(); // buildings, 162 x 162 x 2 bytes
+        this.edgeData = stream.readCompressedBytes(); // edges, 162 x 162 x 1 bytes
+        const ids = stream.readCompressedShorts(); // building IDs
+        this.terrainInfo = stream.readCompressedShorts(); // terrain types, 162 x 162 x 2 bytes
+        stream.skipCompressed(); // unknown
+        this.heightInfo = stream.readCompressedBytes(); // unknown
+        this.minimapInfo = stream.readCompressedBytes();
+        stream.skipCompressed(); // unknown
+        this.randomNumbers = stream.readByte(26244); // unknown (pseudo-random numbers seeds?)
+        stream.skipCompressed(); // unknown
+        stream.skipCompressed(); // unknown
+        stream.skipCompressed(); // unknown
+        stream.skipCompressed(); // unknown
+        stream.skipCompressed(); // unknown
+        const walkers = stream.readCompressedBytes(); // walkers, 1000 x 128 bytes
+        stream.skipCompressed(); // unknown
+        stream.skipCompressed(); // unknown, 600 x 500 bytes
+        stream.skipCompressed(); // unknown, 50 x 128 bytes
+        stream.readByte(12); // unknown, 3 ints
+        stream.skipCompressed(); // city treasury, savings, etc.; rest unknown
+        const name = stream.readChar(70); // governor name; rest unknown
+        stream.skipCompressed(); // buildings, 2000 x 128 bytes
+        stream.readByte(208); // unknown
+        stream.skipCompressed(); // empire map cities, 41 x 66 bytes
+
+        const someInfo = stream.readByte(384);
+        for (const key in MAP_INFO) {
+            this[key] = MAP_INFO[key](stream);
+        }
+
+        // console.info(this);
+        // const scenarioSettings = stream.readByte(2188); // scenario settings (similar to .map file), Start of data copied from the .map file!
+        // const messages = stream.readCompressedBytes(); // messages from your scribes, 1000 x 16 bytes
+        // const unknown16 = stream.readByte(206); // unknown
+        // const unknown17 = stream.readCompressedBytes(); // unknown
+
+    }
+
+    readScenario(stream) {
+        for (const key in MAP_STRUCT) {
+            this[key] = MAP_STRUCT[key](stream);
+        }
+        console.info(this);
     }
 }

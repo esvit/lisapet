@@ -84,6 +84,7 @@ class DrawingContext extends EventEmitter {
       if (window.DEBUG) {
         this.drawFps();
       }
+
       requestAnimationFrame(drawCallback);
     }
     drawCallback();

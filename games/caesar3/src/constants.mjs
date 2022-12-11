@@ -1,6 +1,7 @@
 export const MAX_MAP_SIZE = 160;
 export const MAP_SIZE_AND_BORDER = MAX_MAP_SIZE + 2;
 export const MAP_MOVE_BORDER = 50; // Зона краю коли почне рухатись карта по курсору
+export const MAX_WALKERS = 1000;
 
 export const LAYER_TERRAIN = 2;
 export const LAYER_ROAD = 4;
@@ -21,6 +22,21 @@ export const DIRECTION_NORTH = 1;
 export const DIRECTION_EAST = 2;
 export const DIRECTION_SOUTH = 4;
 export const DIRECTION_WEST = 8;
+
+const NORTH_ATLAS = 'atlases/north1.atlas';
+const MAIN_ATLAS = 'atlases/main1.atlas';
+const CITIZEN1_ATLAS = 'atlases/citizen1.atlas';
+const CARTS_ATLAS = 'atlases/carts.atlas';
+const GOVT_ATLAS = 'atlases/govt1.atlas';
+const UTILITYA_ATLAS = 'atlases/utilitya1.atlas';
+
+export const RESOURCE_ATLASES = [
+    MAIN_ATLAS,
+    CITIZEN1_ATLAS,
+    CARTS_ATLAS,
+    GOVT_ATLAS,
+    UTILITYA_ATLAS
+];
 
 /**
  * Опис типів місцевості, згідно з https://esvit.notion.site/Caesar-3-Terrain-Elements-b19e64fa5ec3443d95ff34a4dc842760
@@ -43,6 +59,7 @@ export const TERRAIN_FOUNTAIN_RANGE = 0x2000;
 export const TERRAIN_WALL = 0x4000;
 export const TERRAIN_GATEHOUSE = 0x8000;
 
+export const EDGE_NOT_OCCUPIED = 0x0;
 export const EDGE_OCCUPIED = 0x40;
 
 // special
@@ -103,3 +120,21 @@ export const WALKER_DIRECTION_NORTH_WEST = 8;
 
 export const WALKER_CART_BEHIND = 0;
 export const WALKER_CART_FRONT = 1;
+
+export const ANIMATION_SLIDES = 11;
+export const MAX_DIRECTION_NUMBER = 8;
+export const MAX_ANIMATIONS_NUMBER = 104;
+
+// citizen01
+export const WALKER_PLAIN_CITIZEN = 0;
+export const WALKER_BATH_WORKER = 1; // блондинка
+export const WALKER_PRIEST = 2; // священик
+export const WALKER_TAXER = 3; // податківець
+export const WALKER_GLADIATOR = 4; // градіатор
+// const WALKER_PRIEST = 5; // градіатор (удар кнутом)
+// const WALKER_TAXER = 6; // податки
+export const WALKER_SCHOOL_CHILD = 7; // дитина зі школи
+export const WALKER_MARKET_LADY = 8; // продавчиня
+export const WALKER_WORKER = 9; // різноробочий
+export const WALKER_IMMIGRANT = 10; // імігрант
+export const WALKER_ENGINEER = 11; // інженер
