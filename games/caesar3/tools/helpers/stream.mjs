@@ -26,6 +26,10 @@ class Stream {
     return this.read(4, length, false, bigEndian);
   }
 
+  readLong(length = 1, bigEndian = false) {
+    return this.read(8, length, false, bigEndian);
+  }
+
   readChar(length = 1) {
     return this.read(1, length, true);
   }

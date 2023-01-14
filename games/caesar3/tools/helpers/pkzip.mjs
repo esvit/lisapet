@@ -334,9 +334,13 @@ class PKStream extends Stream {
     this.seek(this.offset + length);
   }
 
-  readCompressed(size = 1) {
+  getCompressedStream() {
     const length = this.readInt();
-    const pkStream = new PKZipStream(this.readByte(length));
+    return new PKZipStream(this.readByte(length));
+  }
+
+  readCompressed(size = 1) {
+    const pkStream = this.getCompressedStream();
     const buffer = [];
     while (true) {
       try {
