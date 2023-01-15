@@ -2,7 +2,7 @@ import AbstractLayer from './AbstractLayer.mjs';
 import {
   TERRAIN_ROAD
 } from '../constants.mjs';
-import Area from '../Area.mjs';
+import Path from '../Path.mjs';
 import { getTileById } from '../helpers/tileId.mjs';
 
 export default class TerrainLayer extends AbstractLayer {
@@ -10,7 +10,7 @@ export default class TerrainLayer extends AbstractLayer {
   #selectedTool = null;
 
   drawBeforeTiles() {
-    this.#selectedZone = this.map.selectedArea ? new Area(...this.map.selectedArea) : null;
+    this.#selectedZone = this.map.selectedArea ? new Path(...this.map.selectedArea) : null;
     this.#selectedTool = this.map.selectedAreaTool;
     if (this.#selectedTool && this.#selectedZone) {
       this.#selectedTool.prepareArea(this.map, this.#selectedZone);

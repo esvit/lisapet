@@ -12,7 +12,7 @@ import {
     TILE_SIZE_2X,
     TILE_SIZE_3X,
     TILE_SIZE_4X,
-    TILE_SIZE_5X
+    TILE_SIZE_5X, TILE_SIZE_1X, TERRAIN_NONE
 } from './constants.mjs';
 import GridLayer from './Layers/GridLayer.mjs';
 import { createOffscreenCanvas } from './helpers/offscreenCanvas.mjs';
@@ -20,7 +20,7 @@ import DrawingContext from '../../../src/DrawingContext.mjs';
 import TerrainLayer from './Layers/TerrainLayer.mjs';
 import RoadLayer from './Layers/RoadLayer.mjs';
 import ColorLayer from './Layers/ColorLayer.mjs';
-import Area from './Area.mjs';
+import Path from './Path.mjs';
 import {random} from "./helpers/math.mjs";
 
 const TILE_WIDTH = 58;
@@ -82,6 +82,10 @@ class Map {
     get mapSize() {
         return this.#data.size;
     }
+
+    get tiles() {
+        return this.#data.map;
+    }
     
     /**
      * Ініціалізує усе необхідне для карти
@@ -115,7 +119,7 @@ class Map {
         };
         for (let i = 0; i < data.map.length; i++) {
             const rand = random(363, 336);
-            data.map[i] = [rand, 1, 1, 1];
+            data.map[i] = [rand, TERRAIN_NONE, rand, TILE_SIZE_1X];
         }
         return data;
     }
@@ -447,7 +451,7 @@ class Map {
     }
 
     applyTool([start, end], tool) {
-        const area = new Area(start, end);
+        const area = new Path(start, end);
         const coordinates = area.getCoordinates();
         for (const [x, y] of coordinates) {
             const tile = this.get(x, y);

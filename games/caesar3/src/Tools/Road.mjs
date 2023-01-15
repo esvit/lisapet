@@ -1,6 +1,13 @@
 import AbstractTool from './AbstractTool.mjs';
-import { TERRAIN_NONE, TERRAIN_ROAD, TOOLS_ROAD } from '../constants.mjs';
-import { astar, Graph } from '../helpers/astar.mjs';
+import {
+    DIRECTION_EAST,
+    DIRECTION_NONE,
+    DIRECTION_NORTH, DIRECTION_SOUTH, DIRECTION_WEST,
+    TERRAIN_ROAD,
+    TOOLS_ROAD
+} from '../constants.mjs';
+import {pad} from "../helpers/math.mjs";
+import {getIdByTile} from "../helpers/tileId.mjs";
 
 export default class Road extends AbstractTool {
     #buildedPath = null;
@@ -10,35 +17,7 @@ export default class Road extends AbstractTool {
     }
 
     prepareArea(map, area) {
-        const areaForSearch = [];
-        for (let x = area.start[0]; x <= area.end[0]; x++) {
-            const row = [];
-            for (let y = area.start[1]; y <= area.end[1]; y++) {
-                const { terrain } = map.get(x, y);
-                let score = 0;
-                if (terrain === TERRAIN_NONE) {
-                    score = 1;
-                }
-                if (terrain === TERRAIN_ROAD) {
-                    score = 2;
-                }
-                row.push(score);
-            }
-            areaForSearch.push(row);
-        }
-        const graph = new Graph(areaForSearch);
-        const startX = area.startPoint[0] - area.start[0];
-        const startY = area.startPoint[1] - area.start[1];
-        const endX = area.endPoint[0] - area.start[0]
-        const endY = area.endPoint[1] - area.start[1];
-        const pointA = graph.grid[startX][startY];
-        const pointB = graph.grid[endX][endY];
-        const [start, end] = startX > endX ? [pointA, pointB] : [pointB, pointA];
-
-        this.#buildedPath = astar.search(graph, start, end, { closest: true, diagonal: false }).map((node) => ({
-            x: node.x + area.start[0],
-            y: node.y + area.start[1],
-        }));
+        this.#buildedPath = area.buildPath(map);
     }
 
     drawPreviewCell(layer, mapX, mapY, tile) {
@@ -46,11 +25,13 @@ export default class Road extends AbstractTool {
         if (cell) {
             const tileRes = layer.getRandomTerrain(tile.random);
             layer.drawTileSprite({ ...tile, tileSize: 1 }, tileRes);
-            
+
+            const res = 'land2a';
+            const tileId = this.getTileByDirection(cell.direction);
             layer.drawTileSprite({
                 ...tile,
                 tileSize: 1
-            }, 'land2a_00094');
+            }, `${res}_${pad(tileId, 5)}`);
             return true;
         }
     }
@@ -58,10 +39,46 @@ export default class Road extends AbstractTool {
     changeCell(map, mapX, mapY) {
         const cell = this.#buildedPath.find(({ x, y }) => x === mapX && y === mapY);
         if (cell) {
+            const res = 'land2a';
+            const tileId = this.getTileByDirection(cell.direction);
             map.set(mapX, mapY, {
-                tileId: 641,
+                tileId: getIdByTile([res, tileId]),
                 terrain: TERRAIN_ROAD
             });
+        }
+    }
+    
+    getTileByDirection(direction) {
+        switch (direction)
+        {
+            case DIRECTION_NONE: return 101; // no road!
+            case DIRECTION_NORTH: // North
+                return 101;
+          // _changeIndexIfAqueduct( areaInfo, index, 120 );
+            case DIRECTION_EAST: // East
+                return 102;
+          // _changeIndexIfAqueduct( areaInfo, index, 119 );
+            case DIRECTION_SOUTH: // South
+                return 103;
+          // _changeIndexIfAqueduct( areaInfo, index, 120 );
+            case DIRECTION_WEST: // West
+                return 104;
+          // _changeIndexIfAqueduct( areaInfo, index, 119 );
+            case DIRECTION_NORTH + DIRECTION_EAST: return 97; // North+East
+            case DIRECTION_NORTH + DIRECTION_WEST: return 100; // North+West
+            case DIRECTION_SOUTH + DIRECTION_EAST: return 98; // East+South
+            case DIRECTION_SOUTH + DIRECTION_WEST: return 99;  // South+West
+            case DIRECTION_EAST + DIRECTION_WEST: return 94; // 94/96 // East+West
+
+            case DIRECTION_NORTH + DIRECTION_SOUTH: return 93; // 93/95 // North+South
+
+          // index = 94+2*((p.i() + p.j())%2);
+          // _changeIndexIfAqueduct( areaInfo, index, 119);
+            case DIRECTION_NORTH + DIRECTION_EAST + DIRECTION_WEST: return 109; // North+East+West
+            case DIRECTION_NORTH + DIRECTION_EAST + DIRECTION_SOUTH: return 106; // North+East+South
+            case DIRECTION_NORTH + DIRECTION_SOUTH + DIRECTION_WEST: return 108; // North+South+West
+            case DIRECTION_EAST + DIRECTION_SOUTH + DIRECTION_WEST: return 107; // East+South+West
+            case DIRECTION_NORTH + DIRECTION_EAST + DIRECTION_SOUTH + DIRECTION_WEST: return 110; // North+East+South+West
         }
     }
 }
