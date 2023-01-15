@@ -2,21 +2,26 @@ import Map from './Map.mjs';
 import { astar, Graph } from './helpers/astar.mjs';
 import {TERRAIN_NONE, TERRAIN_ROAD} from './constants.mjs';
 import ImmigrantWalker from './Walkers/ImmigrantWalker.mjs';
+import Walkers from "./Walkers.mjs";
 
 export default
 class WalkersMap extends Map {
-  #walkers = [];
-
+  paths = {};
+  
+  buildings = null;
+  
   addWalker(walker, from, to) {
-    this.#walkers.push(walker);
+    this.walkers.walkers.push(walker);
     walker.move(from, to);
+    console.info(this.walkers)
   }
 
   addImmigrantWalker() {
-    if (!this.data || !this.data.peopleEntryPoint) {
+    if (!this.entryPoint) {
       return;
     }
-    const [x, y, x2, y2] = this.data.peopleEntryPoint;
+    const { x, y } = this.entryPoint;
+    const { x: x2, y: y2 } = this.exitPoint;
 
     const walker = new ImmigrantWalker({di: this.di, map: this});
     this.addWalker(walker, [x, y], [x2, y2]);
@@ -44,14 +49,19 @@ class WalkersMap extends Map {
   }
 
   draw(ctx) {
-    for (const walker of this.#walkers) {
-      walker.draw(ctx);
+    const resourceManager = this.di.get('ResourceManager');
+    for (const walker of this.walkers.walkers) {
+      walker.draw(ctx, resourceManager);
     }
   }
 
   tick() {
-    for (const walker of this.#walkers) {
+    for (const walker of this.walkers.walkers) {
       walker.tick();
     }
+  }
+  
+  initWalkers() {
+    this.walkers = new Walkers(this);
   }
 }

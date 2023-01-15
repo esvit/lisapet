@@ -1,6 +1,4 @@
 import {
-    MAP_SIZE_AND_BORDER,
-    MAX_MAP_SIZE,
     LAYER_GRID,
     LAYER_TERRAIN,
     LAYER_ROAD,
@@ -13,24 +11,26 @@ import {
     TERRAIN_TYPES,
     TILE_SIZE_2X,
     TILE_SIZE_3X,
+    TILE_SIZE_4X,
+    TILE_SIZE_5X
 } from './constants.mjs';
 import GridLayer from './Layers/GridLayer.mjs';
 import { createOffscreenCanvas } from './helpers/offscreenCanvas.mjs';
 import DrawingContext from '../../../src/DrawingContext.mjs';
 import TerrainLayer from './Layers/TerrainLayer.mjs';
 import RoadLayer from './Layers/RoadLayer.mjs';
-import NatureLayer from './Layers/NatureLayer.mjs';
-import ColorLayer from "./Layers/ColorLayer.mjs";
-import Area from "./Area.mjs";
+import ColorLayer from './Layers/ColorLayer.mjs';
+import Area from './Area.mjs';
+import {random} from "./helpers/math.mjs";
 
 const TILE_WIDTH = 58;
 const TILE_HEIGHT = 30;
 
 export default
 class Map {
-    di = null;
+    #di = null;
 
-    #mapData = null;
+    #data = null;
 
     #tileWidth = null;
 
@@ -68,59 +68,37 @@ class Map {
                               // - TOOLS_ROAD - показує як буде дорога після побудови
                               // - TOOLS_HOUSE - показує як будуть виглядати зайняті клітинки будинками
 
-    constructor(di, mapData, tileWidth = TILE_WIDTH, tileHeight = TILE_HEIGHT) {
-        this.di = di;
-        this.#mapData = mapData;
-        this.#tileWidth = tileWidth;
-        this.#tileHeight = tileHeight;
-        this.#halfTileWidth = tileWidth / 2;
-        this.#halfTileHeight = tileHeight / 2;
+    constructor(di, mapData) {
+        this.#di = di;
+        this.#data = mapData;
+        this.#tileWidth = TILE_WIDTH;
+        this.#tileHeight = TILE_HEIGHT;
+        this.#halfTileWidth = TILE_WIDTH / 2;
+        this.#halfTileHeight = TILE_HEIGHT / 2;
         this.#zoom = 1;
-    }
-
-    /**
-     * Створює тестову карту
-     */
-    initDebugMap() {
-        this.#mapData = {
-            tileId: new Array(162 * 162),
-            terrainInfo: new Array(162 * 162),
-            edgeData: new Array(162 * 162),
-            heightInfo: new Array(162 * 162),
-            minimapInfo: new Array(162 * 162),
-            randomNumbers: new Array(162 * 162),
-            mapWidth: 80,
-            mapHeight: 80,
-            peopleEntryPoint: [1, 1, 79,79]
-        };
         this.initMap();
-        let i = 1;
-        for (let y = 0; y < 160; y += 2) {
-            for (let x = 0; x < 160; x += 2) {
-                this.set(x, y, {tileId: i++, edgeData: 72 });
-            }
-        }
     }
 
+    get mapSize() {
+        return this.#data.size;
+    }
+    
     /**
      * Ініціалізує усе необхідне для карти
      */
     initMap() {
-        this.mapBorder = (MAX_MAP_SIZE - this.#mapData.mapWidth) / 2;
-
         this.#canvas = createOffscreenCanvas(
-            MAP_SIZE_AND_BORDER * this.#tileWidth,
-            MAP_SIZE_AND_BORDER * this.#tileHeight
+            this.mapSize[0] * this.#tileWidth,
+          this.mapSize[1] * this.#tileHeight
         );
         this.#context = new DrawingContext({ canvas: this.#canvas });
 
-        const scope = this.di.scope();
+        const scope = this.#di.scope();
         scope.set('canvas', this.#canvas);
         scope.set('DrawingContext', new DrawingContext({ canvas: this.#canvas }));
 
         this.#layers[LAYER_TERRAIN] = new TerrainLayer(this, scope);
         this.#layers[LAYER_ROAD] = new RoadLayer(this, scope);
-        this.#layers[LAYER_NATURE] = new NatureLayer(this, scope);
         this.#layers[LAYER_COLOR] = new ColorLayer(this, scope);
         this.#layers[LAYER_GRID] = new GridLayer(this, scope);
 
@@ -128,6 +106,18 @@ class Map {
 
         const [visibleW, visibleH] = this.#visibleAreaSize;
         this.#mapOffset = [-(this.drawWidth - visibleW) / 2, -(this.drawHeight - visibleH) / 2];
+    }
+    
+    static createEmpty(w, h) {
+        const data = {
+            size: [w, h],
+            map: new Array(w * h).fill(1)
+        };
+        for (let i = 0; i < data.map.length; i++) {
+            const rand = random(363, 336);
+            data.map[i] = [rand, 1, 1, 1];
+        }
+        return data;
     }
 
     get visibleAreaSize() {
@@ -151,15 +141,11 @@ class Map {
     }
 
     get size() {
-        return this.#mapData.mapWidth;
+        return this.mapSize[0];
     }
 
     get zoom() {
         return this.#zoom;
-    }
-
-    get data() {
-        return this.#mapData;
     }
 
     get layers() {
@@ -222,10 +208,10 @@ class Map {
         const [offsetX, offsetY] = this.#mapOffset;
         let newX = offsetX + x;
         const [visibleW, visibleH] = this.#visibleAreaSize;
-        const mapBorderWidth = (this.mapBorder * this.#tileWidth) * this.#zoom;
-        const mapBorderHeight = (this.mapBorder * this.#tileHeight) * this.#zoom;
-        const maxVisibleWidth = this.drawWidth - visibleW - mapBorderWidth;
-        const maxVisibleHeight = this.drawHeight - visibleH - mapBorderHeight;
+        const mapBorderWidth = 0;
+        const mapBorderHeight = 0;
+        const maxVisibleWidth = this.drawWidth - visibleW;
+        const maxVisibleHeight = this.drawHeight - visibleH;
         if (newX < -maxVisibleWidth) {
             newX = -maxVisibleWidth;
         }
@@ -244,15 +230,16 @@ class Map {
         return this.#mapOffset;
     }
 
-    toCordinates(mapX, mapY) {
-        if ((mapX < 0 || mapX > MAX_MAP_SIZE) || (mapY < 0 || mapY > MAX_MAP_SIZE)) {
-            throw new Error(`Out of bounds (${mapX}, ${mapY})`);
+    toCordinates(x, y) {
+        if ((x < 0 || x > this.mapSize[0]) || (y < 0 || y > this.mapSize[1])) {
+            throw new Error(`Out of bounds (${x}, ${y})`);
         }
-        mapX += this.mapBorder
-        mapY += this.mapBorder
+        const halfTileWidth = this.#tileWidth / 2;
+        const halfTileHeight = this.#tileHeight / 2;
+
         return [
-            (mapX - mapY + MAX_MAP_SIZE) * this.#halfTileWidth + this.tileWidth,
-            (mapX + mapY) * this.#halfTileHeight + this.tileHeight,
+            (x - y + this.mapSize[0]) * halfTileWidth,
+            (x + y) * halfTileHeight,
             this.#tileWidth,
             this.#tileHeight
         ];
@@ -261,11 +248,11 @@ class Map {
     fromCordinates(x, y) {
         const originX = (x - this.#mapOffset[0] - this.#tileWidth) / this.#zoom;
         const originY = (y - this.#mapOffset[1] - this.#tileHeight) / this.#zoom;
-        let mapX = (originX / this.#halfTileWidth + originY / this.#halfTileHeight - MAX_MAP_SIZE) / 2;
-        let mapY = MAX_MAP_SIZE - (originX / this.#halfTileWidth - mapX);
-        mapX = Math.floor(mapX) - this.mapBorder;
-        mapY = Math.floor(mapY) - this.mapBorder;
-        if (x < 0 || y < 0 || mapX >= this.size || mapY >= this.size || mapX < 0 || mapY < 0) {
+        let mapX = (originX / this.#halfTileWidth + originY / this.#halfTileHeight - this.mapSize[0]) / 2;
+        let mapY = this.mapSize[1] - (originX / this.#halfTileWidth - mapX);
+        mapX = Math.floor(mapX + 2);
+        mapY = Math.floor(mapY);
+        if (x < 0 || y < 0 || mapX >= this.mapSize[0] || mapY >= this.mapSize[1] || mapX < 0 || mapY < 0) {
             return null;
         }
         return [mapX, mapY];
@@ -277,47 +264,78 @@ class Map {
 
     redraw() {
         this.#context.clear('#000');
-        for (const layerKey in this.#layers) {
-            const layer = this.#layers[layerKey];
-            if (!(this.#enabledLayers & Number(layerKey))) {
-                continue;
+
+        const entries = Object.entries(this.#layers).filter(([key]) => this.#enabledLayers & Number(key))
+        const activeLayers = entries.map(([key, layer]) => layer);
+        for (const layer of activeLayers) {
+            layer.drawBeforeTiles();
+        }
+        const tiles = this.getTiles();
+        for (const tile of tiles) {
+            for (const layer of activeLayers) {
+                layer.drawTile(tile);
             }
-            layer.drawLayer();
+        }
+        for (const layer of activeLayers) {
+            layer.drawAfterTiles();
         }
         this.draw(this.#context);
-        // if (this.#layers & LAYER_TERRAIN) {
-        //     this.terrainLayer.drawLayer();
-        // }
-        // if (this.#layers & LAYER_ROAD) {
-        //     this.roadLayer.drawLayer();
-        // }
-        // if (this.#layers & LAYER_GRID) {
-        //     this.gridLayer.drawLayer();
-        // }
         return this.#canvas.getImage();
     }
 
-    * getTiles(flags = null) {
-        for (let mapY = 0; mapY < this.size; mapY++) {
-            for (let mapX = 0; mapX < this.size; mapX++) {
-                const [drawX, drawY, drawW, drawH] = this.toCordinates(mapX, mapY, true);
-                const res = this.get(mapX, mapY);
-                const { tile, terrain } = res;
-                if (tile === 0 && terrain === 0) {
-                    continue;
+    * getDrawOrder() {
+        for (let line = 0; line < this.mapSize[0] + 1; line++) {
+            for (let x = 0; x < line; x++) {
+                const y = line - x - 1;
+                if (x < this.mapSize[0] && y < this.mapSize[1]) {
+                    yield {x, y};
                 }
-                // if (terrain === TERRAIN_NONE) {
-                //     continue;
-                // }
-                if (flags !== null && !(terrain & flags)) {
-                    continue;
-                }
-                yield {
-                    mapX, mapY,
-                    drawX, drawY, drawW, drawH,
-                    ...res
-                };
             }
+        }
+        for (let line = this.mapSize[0] - 1; line > 0; --line) {
+            for (let n = 0; n < line; n++) {
+                const x = (this.mapSize[0] - line) + n;
+                const y = this.mapSize[0] - n - 1;
+                if (x < this.mapSize[0] && y < this.mapSize[1]) {
+                    yield {x, y};
+                }
+            }
+        }
+    }
+    
+    isTileVisible(drawX, drawY) {
+        // return Math.random() * 10 > 5;
+        const x = drawX + this.#mapOffset[0];
+        const y = drawY + this.#mapOffset[1];
+        const border = -300;
+        if (
+          x > border && y > border &&
+          x < this.#visibleAreaSize[0] - border && y < this.#visibleAreaSize[1] - border
+        ) {
+            return true;
+        }
+    }
+    
+    * getTiles(flags = null) {
+        const order = this.getDrawOrder();
+        for (const { x: mapX, y: mapY } of order) {
+            const [drawX, drawY, drawW, drawH] = this.toCordinates(mapX, mapY, true);
+            if (!this.isTileVisible(drawX, drawY)) {
+                continue;
+            }
+            const res = this.get(mapX, mapY);
+            const {tile, terrain} = res;
+            if (tile === 0 && terrain === 0) {
+                continue;
+            }
+            if (flags !== null && !(terrain & flags)) {
+                continue;
+            }
+            yield {
+                mapX, mapY,
+                drawX, drawY, drawW, drawH,
+                ...res
+            };
         }
     }
 
@@ -340,25 +358,6 @@ class Map {
     }
 
     /**
-     * Повертає зміщення комірки в масиві згідно з кординатами на карті
-     *
-     * @param mapX координата X
-     * @param mapY координата Y
-     * @returns {null|number} null - якщо за межами карти, число у випадку комірки в рамках карти
-     */
-    getOffset(mapX, mapY) {
-        if (mapX < 0 || mapY < 0 || mapX > this.size + 1 || mapY > this.size + 1) {
-            return null;
-        }
-        if (this.mapBorder === null) {
-            throw new Error('Call initMap first');
-        }
-        const x = mapX + this.mapBorder + 1; // відступити 1 комірку границі
-        const y = mapY + this.mapBorder + 1;
-        return y * MAP_SIZE_AND_BORDER + x;
-    }
-
-    /**
      * Повертає комбіновану інформацію про клітинку
      *
      * @param mapX
@@ -367,11 +366,10 @@ class Map {
      */
     get(mapX, mapY) {
         const offset = this.getOffset(mapX, mapY);
-        if (offset === null) {
+        if (offset === null || offset < 0) {
             return null;
         }
-        const edge = this.#mapData.edgeData[offset];
-        const minimapInfo = this.#mapData.minimapInfo[offset];
+        const [tile, terrain, random, minimapInfo] = this.#data.map[offset];
         let tileSize = 1;
         if (minimapInfo & TILE_SIZE_2X) {
             tileSize = 2;
@@ -379,44 +377,43 @@ class Map {
         if (minimapInfo & TILE_SIZE_3X) {
             tileSize = 3;
         }
-        // if (edge & EDGE_OCCUPIED) {
-        //     // Опис розрахунку розміру клітинки https://esvit.notion.site/Edge-grids-0c4e62c6d26b4baaa7aeee8efe73333c
-        //     tileSize += (edge - EDGE_OCCUPIED) / 8;
-        // }
+        if (minimapInfo & TILE_SIZE_4X) {
+            tileSize = 4;
+        }
+        if (minimapInfo & TILE_SIZE_5X) {
+            tileSize = 5;
+        }
         return {
             mapX, mapY,
             offset,
             tileSize,
-            tile: this.#mapData.tileId[offset],
-            terrain: this.#mapData.terrainInfo[offset],
-            random: this.#mapData.randomNumbers[offset],
-            edge,
-            elevation: this.#mapData.heightInfo[offset],
+            tile,
+            terrain,
+            random,
             minimapInfo
         };
     }
 
-    set(mapX, mapY, { tileId, terrain, edgeData, heightInfo, minimapInfo }) {
+    set(mapX, mapY, { tileId, terrain, minimapInfo }) {
         const offset = this.getOffset(mapX, mapY);
         if (offset === null) {
             return null;
         }
-
+        let [tile, terrainInfo, random, minimap] = this.#data.map[offset];
         if (typeof tileId !== 'undefined') {
-            this.#mapData.tileId[offset] = tileId;
+            tile = tileId;
         }
         if (typeof terrain !== 'undefined') {
-            this.#mapData.terrainInfo[offset] = terrain;
-        }
-        if (typeof edgeData !== 'undefined') {
-            this.#mapData.edgeData[offset] = edgeData;
-        }
-        if (typeof heightInfo !== 'undefined') {
-            this.#mapData.heightInfo[offset] = heightInfo;
+            terrainInfo = terrain;
         }
         if (typeof minimapInfo !== 'undefined') {
-            this.#mapData.minimapInfo[offset] = minimapInfo;
+            minimap = minimapInfo;
         }
+        this.#data.map[offset] = [tile, terrainInfo, random, minimap];
+    }
+
+    getOffset(x, y) {
+        return y * this.mapSize[0] + x;
     }
 
     getTerrainInfo(mapX, mapY) {
@@ -435,6 +432,18 @@ class Map {
         if (this.#layers[LAYER_GRID]) {
             this.#layers[LAYER_GRID].mouseMove(x, y);
         }
+        
+        // for (const walker of this.walkers.walkers) {
+        //     walker.isHovered = false;
+        // }
+
+        // const [mapX, mapY] = this.fromCordinates(x, y);
+        // const people = this.walkers.findByXY(mapX, mapY);
+        // if (people.length) {
+        //     for (const person of people) {
+        //         person.hover();
+        //     }
+        // }
     }
 
     applyTool([start, end], tool) {
@@ -446,4 +455,6 @@ class Map {
         }
         this.#layers[LAYER_ROAD].rebuildTiles();
     }
+    
+    tick() {}
 }

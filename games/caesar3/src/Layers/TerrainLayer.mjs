@@ -1,38 +1,39 @@
 import AbstractLayer from './AbstractLayer.mjs';
 import {
-  EDGE_OCCUPIED, TERRAIN_ROAD
+  TERRAIN_ROAD
 } from '../constants.mjs';
 import Area from '../Area.mjs';
 import { getTileById } from '../helpers/tileId.mjs';
 
 export default class TerrainLayer extends AbstractLayer {
-  drawLayer() {
-    const selectedZone = this.map.selectedArea ? new Area(...this.map.selectedArea) : null;
-    const tiles = this.map.getTiles();
-    const tool = this.map.selectedAreaTool;
-    if (tool && selectedZone) {
-      tool.prepareArea(this.map, selectedZone);
-    }
-    for (const tile of tiles) {
-      const { mapX, mapY, edge, terrain, random } = tile;
-      const tileSprite = this.getTile(tile);
-      if (!tileSprite) {
-        continue;
-      }
-      if (tool && selectedZone && selectedZone.inArea(mapX, mapY)) {
-        if (tool.drawPreviewCell(this, mapX, mapY, tile)) {
-          continue;
-        }
-      }
+  #selectedZone = null;
+  #selectedTool = null;
 
-      if (edge & EDGE_OCCUPIED) {
-        if (terrain & TERRAIN_ROAD) {
-          const randTile = this.getRandomTerrain(random);
-          this.drawTile(tile, randTile);
-        }
-        this.drawTile(tile, tileSprite);
+  drawBeforeTiles() {
+    this.#selectedZone = this.map.selectedArea ? new Area(...this.map.selectedArea) : null;
+    this.#selectedTool = this.map.selectedAreaTool;
+    if (this.#selectedTool && this.#selectedZone) {
+      this.#selectedTool.prepareArea(this.map, this.#selectedZone);
+    }
+  }
+
+  drawTile(tile) {
+    const { mapX, mapY, terrain, random } = tile;
+    const tileSprite = this.getTile(tile);
+    if (!tileSprite) {
+      return;
+    }
+    if (this.#selectedTool && this.#selectedZone && this.#selectedZone.inArea(mapX, mapY)) {
+      if (this.#selectedTool.drawPreviewCell(this, mapX, mapY, tile)) {
+        return;
       }
     }
+
+    if (terrain & TERRAIN_ROAD) {
+      const randTile = this.getRandomTerrain(random);
+      this.drawTileSprite(tile, randTile);
+    }
+    this.drawTileSprite(tile, tileSprite);
   }
 
   getRandomTerrain(random) {

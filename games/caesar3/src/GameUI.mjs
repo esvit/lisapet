@@ -1,5 +1,6 @@
 import {LAYER_TERRAIN, LAYERS} from './constants.mjs';
 import EventEmitter from '../../../src/EventEmitter.mjs';
+import Map from './Map.mjs';
 
 export default
 class GameUI extends EventEmitter {
@@ -13,13 +14,16 @@ class GameUI extends EventEmitter {
      */
     #imgPlaceholder = null;
 
+    #di = null;
+
     #map = null;
 
     #selectedTool = null;
 
-    constructor() {
+    constructor({ di }) {
         super();
 
+        this.#di = di;
         this.#menuOverlays = document.getElementById('menuOverlays');
         this.#menuBuildings = document.getElementById('menuBuildings');
         this.#imgPlaceholder = document.getElementById('imgPlaceholder');
@@ -32,6 +36,29 @@ class GameUI extends EventEmitter {
     }
 
     addEvents() {
+        document.getElementById('newGame').onclick = (e) => {
+            e.preventDefault();
+            const sceneManager = this.#di.get('SceneManager');
+            const mapData = Map.createEmpty(50, 50);
+            sceneManager.currentScene.map = new Map(this.#di, mapData);
+            sceneManager.currentScene.resize();
+        };
+        document.getElementById('loadGame').onclick = async (e) => {
+            e.preventDefault();
+            const resourceManager = this.#di.get('ResourceManager');
+            const sceneManager = this.#di.get('SceneManager');
+            const mapData = await resourceManager.loadJsonByUrl('maps/Brigantium.map.json');
+            sceneManager.currentScene.map = new Map(this.#di, mapData);
+            sceneManager.currentScene.resize();
+        };
+        document.getElementById('loadSaveGame').onclick = async (e) => {
+            e.preventDefault();
+            const resourceManager = this.#di.get('ResourceManager');
+            const sceneManager = this.#di.get('SceneManager');
+            const mapData = await resourceManager.loadJsonByUrl('maps/saved_game.sav.json');
+            sceneManager.currentScene.map = new Map(this.#di, mapData);
+            sceneManager.currentScene.resize();
+        };
         document.getElementById('showMissionDialog').onclick = (e) => {
             e.preventDefault();
             this.showMissionDialog();
@@ -72,12 +99,23 @@ class GameUI extends EventEmitter {
         const els = el.querySelectorAll('[data-bind]');
         for (const elem of els) {
             const key = elem.getAttribute('data-bind');
-            if (typeof values[key] !== 'undefined') {
-                elem.innerHTML = values[key];
+            const value = this.getField(values, key);
+            if (typeof value !== 'undefined') {
+                elem.innerHTML = value;
             }
         }
     }
 
+    getField(obj, field) {
+        const parts = field.split('.');
+        let current = obj;
+        for (const part of parts) {
+            const key = Array.isArray(current) ? Number(part) : part;
+            current = typeof current !== 'undefined' ? current[key] : undefined;
+        }
+        return current;
+    }
+    
     showDialog(id, values = {}) {
         const dialog = document.getElementById(id);
         this.bindValues(dialog, values);
@@ -113,6 +151,12 @@ class GameUI extends EventEmitter {
         dialog.addEventListener('close', () => {
             document.getElementById('video').currentTime = 0;
             document.getElementById('video').pause();
+        });
+    }
+
+    showBuildingInfoDialog(info) {
+        const dialog = this.showDialog('buildingInfo', info);
+        dialog.addEventListener('close', () => {
         });
     }
 

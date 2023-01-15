@@ -44,7 +44,10 @@ export default class Road extends AbstractTool {
     drawPreviewCell(layer, mapX, mapY, tile) {
         const cell = this.#buildedPath.find(({ x, y }) => x === mapX && y === mapY);
         if (cell) {
-            layer.drawTile({
+            const tileRes = layer.getRandomTerrain(tile.random);
+            layer.drawTileSprite({ ...tile, tileSize: 1 }, tileRes);
+            
+            layer.drawTileSprite({
                 ...tile,
                 tileSize: 1
             }, 'land2a_00094');

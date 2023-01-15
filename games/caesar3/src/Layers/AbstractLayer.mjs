@@ -9,7 +9,19 @@ class AbstractLayer {
         this.resourceManager = di.get('ResourceManager');
     }
 
-    drawTile(tile, name) {
+    drawBeforeTiles() {
+        // draw before all
+    }
+
+    drawTile() {
+        // abstract
+    }
+
+    drawAfterTiles() {
+        // draw after all
+    }
+
+    drawTileSprite(tile, name) {
         const { drawX, drawY, drawW, drawH, tileSize = 1 } = tile;
 
         const tileName = Array.isArray(name) ? `${name[0]}_${pad(name[1], 5)}` : name;

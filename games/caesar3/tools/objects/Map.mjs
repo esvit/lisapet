@@ -30,16 +30,6 @@ class Map {
 
   scenario = null;
 
-  // map size
-  mapWidth = 0;
-  mapHeight = 0;
-  borderSize = 0;
-  startOffset = 0;
-
-  entryPoint = { x: 0, y: 0 };
-
-  exitPoint = { x: 0, y: 0 };
-
   restoreLayers(stream, isSavedGame = false) {
     this.tileId = isSavedGame ? stream.readCompressedShorts() : stream.readShort(GRID_SIZE); // buildings, 162 x 162 x 2 bytes
     this.edgeData = isSavedGame ? stream.readCompressedBytes() : stream.readByte(GRID_SIZE); // edges, 162 x 162 x 1 bytes

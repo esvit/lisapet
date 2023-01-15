@@ -1,0 +1,54 @@
+{
+  "name": "lisapet",
+  "version": "0.0.1",
+  "description": "JS game engine",
+  "main": "index.html",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/esvit/lisapet.git"
+  },
+  "keywords": [
+    "js",
+    "game",
+    "2d"
+  ],
+  "author": "Vitalii Savchuk",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/esvit/lisapet/issues"
+  },
+  "homepage": "https://github.com/esvit/lisapet#readme",
+  "devDependencies": {
+    "@open-wc/testing": "^3.1.2",
+    "@web/test-runner": "^0.13.27",
+    "@web/test-runner-mocha": "^0.7.5",
+    "http-server": "^14.1.0",
+    "jest": "^27.5.1"
+  },
+  "jest": {
+    "testPathIgnorePatterns": [
+      "dist/",
+      "node_modules/"
+    ],
+    "modulePathIgnorePatterns": [
+      "dist/",
+      "node_modules/"
+    ],
+    "collectCoverage": true,
+    "coverageReporters": [
+      "html"
+    ],
+    "testMatch": [
+      "**/*.test.mjs"
+    ],
+    "globals": {
+      "window": {}
+    }
+  },
+  "dependencies": {
+    "ffmpeg": "0.0.4"
+  }
+}

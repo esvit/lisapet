@@ -1,5 +1,4 @@
 import AbstractLayer from './AbstractLayer.mjs';
-import { MAX_MAP_SIZE } from '../constants.mjs';
 
 export default
 class GridLayer extends AbstractLayer {
@@ -11,7 +10,7 @@ class GridLayer extends AbstractLayer {
         this.#selectedTile = this.map.fromCordinates(x, y);
     }
 
-    drawLayer() {
+    drawAfterTiles() {
         const { drawWidth, drawHeight, tileHeight, tileWidth } = this.map;
         const toCordinates = this.map.toCordinates.bind(this.map);
         const halfTileWidth = tileWidth / 2;

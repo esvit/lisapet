@@ -16,7 +16,7 @@ export default class Shovel extends AbstractTool {
     drawPreviewCell(layer, mapX, mapY, tile) {
         if (tile.terrain & TERRAIN_CLEARABLE) {
             const tileRes = layer.getRandomTerrain(tile.random);
-            layer.drawTile({ ...tile, tileSize: 1 }, tileRes);
+            layer.drawTileSprite({ ...tile, tileSize: 1 }, tileRes);
             return true;
         }
     }

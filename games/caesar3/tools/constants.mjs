@@ -23,3 +23,10 @@ export const BUILDING_POTTERY_WORKSHOP = 114;
 export const MAX_MAP_SIZE = 160;
 export const MAP_SIZE_AND_BORDER = MAX_MAP_SIZE + 2;
 export const GRID_SIZE = MAP_SIZE_AND_BORDER * MAP_SIZE_AND_BORDER;
+export const TERRAIN_EMPTY = 5;
+
+export const TILE_SIZE_1X = 0;
+export const TILE_SIZE_2X = 1;
+export const TILE_SIZE_3X = 2;
+
+export const EDGE_OCCUPIED = 0x40;

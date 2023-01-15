@@ -9,6 +9,7 @@ import {
   WALKER_DIRECTION_SOUTH_WEST,
   WALKER_DIRECTION_WEST
 } from '../constants.mjs';
+import Figure from "../GameObjects/Figure.mjs";
 
 const MOVING_MATRIX = {
   [WALKER_DIRECTION_NORTH]: [-0.7, 0.7],
@@ -36,47 +37,21 @@ const WALKER_IMMIGRANT = 10; // імігрант
 const WALKER_ENGINEER = 11; // інженер
 
 export default
-class Walker {
-  #di = null;
-
-  #map = null;
-
-  #resourceManager = null;
-
-  #x = 0;
-
-  #y = 0;
-
-  #direction = WALKER_DIRECTION_NORTH;
-
+class Walker extends Figure {
   #path = [];
 
   #cart = null;
 
   #destination = null;
 
-  #slide = 0;
+  #slide = 2;
 
-  constructor({ di, map }) {
-    this.#di = di;
-    this.#map = map;
-    this.#resourceManager = di.get('ResourceManager');
-  }
+  directions = [];
 
-  get direction() {
-    return this.#direction;
-  }
+  isHovered = false;
 
-  set direction(val) {
-    this.#direction = val;
-  }
-
-  get x() {
-    return this.#x;
-  }
-
-  get y() {
-    return this.#y;
+  constructor(id, map) {
+    super(id, map);
   }
 
   get destination() {
@@ -97,20 +72,37 @@ class Walker {
   }
 
   move(start, dest) {
-    const hW = this.#map.tileWidth / 2;
-    const hH = this.#map.tileHeight / 2;
-    this.#path = this.#map.getPath(start, dest).map(({ x, y }) => {
-      const [a, b] = this.#map.toCordinates(x, y);
+    const hW = this.map.tileWidth / 2;
+    const hH = this.map.tileHeight / 2;
+    this.#path = this.map.getPath(start, dest).map(({ x, y }) => {
+      const [a, b] = this.map.toCordinates(x, y);
       return [a - hW, b - hH];
     });
     const point = this.#path.shift();
-    this.#x = point[0];
-    this.#y = point[1];
+    this.x = point[0];
+    this.y = point[1];
   }
 
-  draw(ctx) {
-    const x = this.#x;
-    const y = this.#y;
+  hover() {
+    this.isHovered = true;
+  }
+  
+  get spriteX() {
+    return this.x + this.tileProgressX - this.map.tileWidth / 2;
+  }
+  
+  get spriteY() {
+    return this.y + this.tileProgressY - this.map.tileHeight / 2;
+  }
+
+  draw(ctx, resourceManager) {
+    if (this.x === null) {
+      const [x, y] = this.position.toCordinates();
+      this.x = x;
+      this.y = y;
+    }
+    const x = this.x + this.tileProgressX - this.map.tileWidth / 2;
+    const y = this.y + this.tileProgressY - this.map.tileHeight / 2;
     const drawCartBehindFirst = [
       WALKER_DIRECTION_EAST,
       WALKER_DIRECTION_SOUTH_EAST,
@@ -120,88 +112,91 @@ class Walker {
 
     const isCartFirst = this.#cart
       && (
-        (this.#cart.cartPosition === WALKER_CART_BEHIND && drawCartBehindFirst.includes(this.#direction))
+        (this.#cart.cartPosition === WALKER_CART_BEHIND && drawCartBehindFirst.includes(this.direction))
         ||
-        (this.#cart.cartPosition === WALKER_CART_FRONT && !drawCartBehindFirst.includes(this.#direction))
+        (this.#cart.cartPosition === WALKER_CART_FRONT && !drawCartBehindFirst.includes(this.direction))
       );
 
     if (isCartFirst && this.#cart) {
-      this.#cart.draw(ctx);
+      this.#cart.draw(ctx, resourceManager);
     }
 
-    const n = (this.#slide % ANIMATION_SLIDES) * MAX_DIRECTION_NUMBER + this.#direction + (this.spriteNumber * MAX_ANIMATIONS_NUMBER);
-    const [img, tileX, tileY, tileW, tileH] = this.#resourceManager.getByAtlas(`citizen01_${pad(n, 5)}`);
+    const n = (this.#slide % ANIMATION_SLIDES) * MAX_DIRECTION_NUMBER + this.direction + 1 + (this.spriteNumber * MAX_ANIMATIONS_NUMBER);
+    const [img, tileX, tileY, tileW, tileH] = resourceManager.getByAtlas(`citizen01_${pad(n, 5)}`);
     ctx.drawSprite(
       img,
       tileX, tileY, tileW, tileH,
       x, y, tileW, tileH
     );
 
-    if (true) {
-      const lines = [];
-      let start = null;
-      for (const point of this.#path) {
-        if (!start) {
-          start = point;
-          continue;
-        }
-        lines.push([
-          start[0] + this.#map.tileWidth / 2,
-          start[1] + this.#map.tileHeight / 2,
-          point[0] + this.#map.tileWidth / 2,
-          point[1] + this.#map.tileHeight / 2
-        ]);
-        start = point;
-      }
-      ctx.lines(lines);
-      ctx.drawRect(this.#path[0][0] + this.#map.tileWidth / 2, this.#path[0][1] + this.#map.tileHeight / 2, 5, 5, 'red');
+    if (this.isHovered) {
+      ctx.drawRect(x, y, tileW, tileH);
+      // const lines = [];
+      // let start = null;
+      // for (const point of this.#path) {
+      //   if (!start) {
+      //     start = point;
+      //     continue;
+      //   }
+      //   lines.push([
+      //     start[0] + this.#map.tileWidth / 2,
+      //     start[1] + this.#map.tileHeight / 2,
+      //     point[0] + this.#map.tileWidth / 2,
+      //     point[1] + this.#map.tileHeight / 2
+      //   ]);
+      //   start = point;
+      // }
+      // ctx.lines(lines);
+      // ctx.drawRect(this.#path[0][0] + this.#map.tileWidth / 2, this.#path[0][1] + this.#map.tileHeight / 2, 5, 5, 'red');
+      // this.isHovered = false;
     }
 
     if (!isCartFirst && this.#cart) {
-      this.#cart.draw(ctx);
+      this.#cart.draw(ctx, resourceManager);
     }
   }
 
   tick() {
+    return;
     if (!this.#path.length) {
       return;
     }
     this.#slide += 1;
 
-    const [x, y] = MOVING_MATRIX[this.#direction];
-    this.#x -= x * 3;
-    this.#y -= y / 1.93333 * 3;
+    const [x, y] = MOVING_MATRIX[this.direction];
+    this.x -= x * 3;
+    this.y -= y / 1.93333 * 3;
 
     const destPoint = this.#path[0];
-    const distX = Math.abs(this.#x - destPoint[0]);
-    const distY = Math.abs(this.#y - destPoint[1]);
+    const distX = Math.abs(this.x - destPoint[0]);
+    const distY = Math.abs(this.y - destPoint[1]);
     if (distX < 10 && distY < 10) {
       this.#path.shift();
     }
-    var angleDeg = Math.atan2(destPoint[1] - this.#y, destPoint[0] - this.#x) * 180 / Math.PI;
+    var angleDeg = Math.atan2(destPoint[1] - this.y, destPoint[0] - this.x) * 180 / Math.PI;
 
     if (angleDeg > -45 && angleDeg < 0) {
-      this.#direction = WALKER_DIRECTION_NORTH;
+      this.direction = WALKER_DIRECTION_NORTH;
     }
     if (angleDeg > -135 && angleDeg < -90) {
-      this.#direction = WALKER_DIRECTION_NORTH_WEST;
+      this.direction = WALKER_DIRECTION_NORTH_WEST;
     }
     if (angleDeg > -180 && angleDeg < -135) {
-      this.#direction = WALKER_DIRECTION_WEST;
+      this.direction = WALKER_DIRECTION_WEST;
     }
     if (angleDeg > 0 && angleDeg < 46) {
-      this.#direction = WALKER_DIRECTION_NORTH_EAST;
+      this.direction = WALKER_DIRECTION_NORTH_EAST;
     }
     if (angleDeg > 45 && angleDeg < 90) {
-      this.#direction = WALKER_DIRECTION_EAST;
+      this.direction = WALKER_DIRECTION_EAST;
     }
     if (angleDeg > 90 && angleDeg < 135) {
-      this.#direction = WALKER_DIRECTION_SOUTH_EAST;
+      this.direction = WALKER_DIRECTION_SOUTH_EAST;
     }
     if (angleDeg > 135 && angleDeg < 180) {
-      this.#direction = WALKER_DIRECTION_SOUTH;
+      this.direction = WALKER_DIRECTION_SOUTH;
     }
-    console.info(angleDeg, this.#direction)
+    console.info(angleDeg, this.direction)
   }
 }
 

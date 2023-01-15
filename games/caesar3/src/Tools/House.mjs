@@ -8,7 +8,7 @@ export default class House extends AbstractTool {
 
     drawPreviewCell(layer, mapX, mapY, tile) {
         if (tile.terrain === TERRAIN_NONE) {
-            layer.drawTile({
+            layer.drawTileSprite({
                 ...tile,
                 tileSize: 1
             }, 'housng1a_00045');
@@ -19,7 +19,7 @@ export default class House extends AbstractTool {
     changeCell(map, x, y, { terrain }) {
         if (terrain === TERRAIN_NONE) {
             map.set(x, y, {
-                tileId: 2874,
+                tileId: 2823,
                 terrain: TERRAIN_BUILDING
             });
         }

@@ -4,10 +4,10 @@ import { WALKER_IMMIGRANT } from '../constants.mjs';
 
 export default
 class ImmigrantWalker extends Walker {
-  constructor({ di, map }) {
-    super({ di, map });
+  constructor(id, map) {
+    super(id, map);
 
-    this.cart = new ImmigrantCart({ di });
+    this.cart = new ImmigrantCart(map);
   }
 
   get spriteNumber() {

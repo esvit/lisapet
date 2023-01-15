@@ -12,13 +12,8 @@ import {
 
 export default
 class ColorLayer extends AbstractLayer {
-    drawLayer() {
-        const tiles = this.map.getTiles();
-        for (const tile of tiles) {
-            const { mapX, mapY, terrain } = tile;
-
-            this.drawColorTile(mapX, mapY, this.getTerrainColor(terrain));
-        }
+    drawTile({ mapX, mapY, terrain }) {
+        this.drawColorTile(mapX, mapY, this.getTerrainColor(terrain));
     }
 
     getTerrainColor(terrain) {

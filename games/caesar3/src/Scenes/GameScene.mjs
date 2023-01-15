@@ -1,11 +1,10 @@
 import Scene from '../../../../src/Scene.mjs';
 import { moveMapNearBorder, outMapNearBorder } from '../helpers/moveMapNearBorder.mjs';
-import {MOUSE_RIGHT_BUTTON} from "../../../../src/InputManager.mjs";
+import { MOUSE_RIGHT_BUTTON } from '../../../../src/InputManager.mjs';
 import { TOOLS_HOUSE, TOOLS_ROAD, TOOLS_SHOVEL, RESOURCE_ATLASES } from '../constants.mjs';
 import Shovel from '../Tools/Shovel.mjs';
 import House from '../Tools/House.mjs';
 import Road from '../Tools/Road.mjs';
-import ImmigrantWalker from "../Walkers/ImmigrantWalker.mjs";
 
 export default
 class GameScene extends Scene {
@@ -107,6 +106,10 @@ class GameScene extends Scene {
         this.#inputManager.off('mousedown');
         this.#gameUI.off('tool');
     }
+    
+    resize() {
+        this.#map.visibleAreaSize = [this.#drawingContext.width, this.#drawingContext.height];
+    }
 
     resume() {
         this.#inputManager.on('click', this.click.bind(this));
@@ -116,7 +119,7 @@ class GameScene extends Scene {
         this.#canvas.addEventListener('wheel', (e) => {
             e.preventDefault(); // disable the actual scrolling
 
-            this.#map.visibleAreaSize = [this.#drawingContext.width, this.#drawingContext.height];
+            this.resize();
             this.#map.move(-e.deltaX, -e.deltaY);
         }, { passive: false });
         this.#gameUI.on('tool', (name) => {
@@ -139,6 +142,9 @@ class GameScene extends Scene {
     }
 
     click({ x, y }) {
+        if (!this.#map) {
+            return;
+        }
         if (!this.#map.selectedAreaTool) {
         }
     }
@@ -167,21 +173,36 @@ class GameScene extends Scene {
     }
 
     mousedown({ x, y, button }) {
+        if (!this.#map) {
+            return;
+        }
         if (button === MOUSE_RIGHT_BUTTON) { // відловити в кліку це не можна, бо показує контексне меню
             stop();
             if (this.selectedTool === null) {
                 const [mapX, mapY] = this.#map.fromCordinates(x, y);
                 const terrainInfo = this.#map.getTerrainInfo(mapX, mapY)
-                const {tile, edge, minimapInfo, elevation} = this.#map.get(mapX, mapY)
+                const {tile, edge, minimapInfo, elevation, buildingId} = this.#map.get(mapX, mapY)
 
-                this.#gameUI.showTerrainInfoDialog({
-                    ...terrainInfo,
-                    tile,
-                    edge,
-                    elevation,
-                    minimapInfo,
-                    mapX, mapY
-                });
+                if (buildingId) {
+                    const house = this.#map.buildings.getById(buildingId);
+                    console.info(house)
+                    this.#gameUI.showBuildingInfoDialog(house);
+                } else {
+                    // const people = this.#map.walkers.findByXY(mapX, mapY);
+                    // if (people.length) {
+                    //     console.info(people);
+                    //     window.person = people[0];
+                    // } else {
+                        this.#gameUI.showTerrainInfoDialog({
+                            ...terrainInfo,
+                            tile,
+                            edge,
+                            elevation,
+                            minimapInfo,
+                            mapX, mapY
+                        });
+                    // }
+                }
             } else {
                 this.selectedTool = null;
             }
@@ -198,6 +219,9 @@ class GameScene extends Scene {
     }
 
     mouseup(e) {
+        if (!this.#map) {
+            return;
+        }
         if (this.#map.selectedArea) {
             this.#map.applyTool(this.#map.selectedArea, this.#selectedTool);
         }
