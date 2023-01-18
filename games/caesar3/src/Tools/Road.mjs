@@ -2,7 +2,7 @@ import AbstractTool from './AbstractTool.mjs';
 import {
     DIRECTION_EAST,
     DIRECTION_NONE,
-    DIRECTION_NORTH, DIRECTION_SOUTH, DIRECTION_WEST,
+    DIRECTION_NORTH, DIRECTION_SOUTH, DIRECTION_WEST, TERRAIN_PATH_ROAD,
     TERRAIN_ROAD,
     TOOLS_ROAD
 } from '../constants.mjs';
@@ -17,17 +17,20 @@ export default class Road extends AbstractTool {
     }
 
     prepareArea(map, area) {
-        this.#buildedPath = area.buildPath(map);
+        this.#buildedPath = area.buildPath(map, { occupied: true, mapOccupied: true }, TERRAIN_PATH_ROAD);
     }
 
     drawPreviewCell(layer, mapX, mapY, tile) {
+        if (!this.#buildedPath) {
+            return;
+        }
         const cell = this.#buildedPath.find(({ x, y }) => x === mapX && y === mapY);
         if (cell) {
             const tileRes = layer.getRandomTerrain(tile.random);
             layer.drawTileSprite({ ...tile, tileSize: 1 }, tileRes);
 
             const res = 'land2a';
-            const tileId = this.getTileByDirection(cell.direction);
+            const tileId = this.getTileByDirection(cell.occupied);
             layer.drawTileSprite({
                 ...tile,
                 tileSize: 1
@@ -37,10 +40,13 @@ export default class Road extends AbstractTool {
     }
 
     changeCell(map, mapX, mapY) {
+        if (!this.#buildedPath) {
+            return;
+        }
         const cell = this.#buildedPath.find(({ x, y }) => x === mapX && y === mapY);
         if (cell) {
             const res = 'land2a';
-            const tileId = this.getTileByDirection(cell.direction);
+            const tileId = this.getTileByDirection(cell.occupied);
             map.set(mapX, mapY, {
                 tileId: getIdByTile([res, tileId]),
                 terrain: TERRAIN_ROAD

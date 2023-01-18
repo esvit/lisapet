@@ -21,7 +21,7 @@ class AbstractLayer {
         // draw after all
     }
 
-    drawTileSprite(tile, name) {
+    drawTileSprite(tile, name, pos = null) {
         const { drawX, drawY, drawW, drawH, tileSize = 1 } = tile;
 
         const tileName = Array.isArray(name) ? `${name[0]}_${pad(name[1], 5)}` : name;
@@ -30,6 +30,10 @@ class AbstractLayer {
             const [img, tileX, tileY, tileW, tileH] = sprite;
             let x = drawX - drawW / 2;
             let y = drawY - drawH - (tileH - drawH) + drawH / 2 * tileSize + drawH / 2;
+            if (pos) {
+                x = pos[0];
+                y = pos[1];
+            }
 
             this.drawingContext.drawSprite(
                 img,

@@ -7,12 +7,15 @@ import {
     DIRECTION_SOUTH,
     DIRECTION_EAST,
     LAYER_COLOR,
-    LAYER_NATURE,
     TERRAIN_TYPES,
     TILE_SIZE_2X,
     TILE_SIZE_3X,
     TILE_SIZE_4X,
-    TILE_SIZE_5X, TILE_SIZE_1X, TERRAIN_NONE
+    TILE_SIZE_5X,
+    TILE_SIZE_1X,
+    TERRAIN_NONE,
+    LAYER_BUILDINGS,
+    LAYER_FIGURES
 } from './constants.mjs';
 import GridLayer from './Layers/GridLayer.mjs';
 import { createOffscreenCanvas } from './helpers/offscreenCanvas.mjs';
@@ -22,6 +25,9 @@ import RoadLayer from './Layers/RoadLayer.mjs';
 import ColorLayer from './Layers/ColorLayer.mjs';
 import Path from './Path.mjs';
 import {random} from "./helpers/math.mjs";
+import GameState from "./GameState.mjs";
+import BuildingsLayer from './Layers/BuildingsLayer.mjs';
+import FiguresLayer from './Layers/FiguresLayer.mjs';
 
 const TILE_WIDTH = 58;
 const TILE_HEIGHT = 30;
@@ -49,12 +55,13 @@ class Map {
     #layers = {
         [LAYER_TERRAIN]: null,
         [LAYER_ROAD]: null,
-        [LAYER_NATURE]: null,
+        [LAYER_BUILDINGS]: null,
+        [LAYER_FIGURES]: null,
         [LAYER_COLOR]: null,
         [LAYER_GRID]: null,
     };
 
-    #enabledLayers = LAYER_TERRAIN;
+    #enabledLayers = LAYER_TERRAIN | LAYER_BUILDINGS | LAYER_FIGURES;
 
     #mapOffset = [0, 0];
 
@@ -68,6 +75,8 @@ class Map {
                               // - TOOLS_ROAD - показує як буде дорога після побудови
                               // - TOOLS_HOUSE - показує як будуть виглядати зайняті клітинки будинками
 
+    #gameState = null;
+    
     constructor(di, mapData) {
         this.#di = di;
         this.#data = mapData;
@@ -86,6 +95,14 @@ class Map {
     get tiles() {
         return this.#data.map;
     }
+
+    get entryPoint() {
+        return this.#data.entryPoint;
+    }
+
+    get state() {
+        return this.#gameState;
+    }
     
     /**
      * Ініціалізує усе необхідне для карти
@@ -103,6 +120,8 @@ class Map {
 
         this.#layers[LAYER_TERRAIN] = new TerrainLayer(this, scope);
         this.#layers[LAYER_ROAD] = new RoadLayer(this, scope);
+        this.#layers[LAYER_BUILDINGS] = new BuildingsLayer(this, scope);
+        this.#layers[LAYER_FIGURES] = new FiguresLayer(this, scope);
         this.#layers[LAYER_COLOR] = new ColorLayer(this, scope);
         this.#layers[LAYER_GRID] = new GridLayer(this, scope);
 
@@ -110,11 +129,16 @@ class Map {
 
         const [visibleW, visibleH] = this.#visibleAreaSize;
         this.#mapOffset = [-(this.drawWidth - visibleW) / 2, -(this.drawHeight - visibleH) / 2];
+        
+        this.#gameState = new GameState(this.#data);
     }
     
     static createEmpty(w, h) {
         const data = {
             size: [w, h],
+            entryPoint: { x: 0, y: Math.round(h / 2) },
+            exitPoint: { x: w - 1, y: Math.round(h / 2) },
+            initialState: { funds: 10000 },
             map: new Array(w * h).fill(1)
         };
         for (let i = 0; i < data.map.length; i++) {
@@ -269,12 +293,20 @@ class Map {
     redraw() {
         this.#context.clear('#000');
 
-        const entries = Object.entries(this.#layers).filter(([key]) => this.#enabledLayers & Number(key))
+        const entries = Object.entries(this.#layers).filter(([key]) => this.#enabledLayers & Number(key) && Number(key) !== LAYER_TERRAIN)
         const activeLayers = entries.map(([key, layer]) => layer);
         for (const layer of activeLayers) {
             layer.drawBeforeTiles();
         }
-        const tiles = this.getTiles();
+        let tiles = this.getTiles();
+        if (this.#enabledLayers && LAYER_TERRAIN) {
+            this.#layers[LAYER_TERRAIN].drawBeforeTiles();
+            for (const tile of tiles) {
+                this.#layers[LAYER_TERRAIN].drawTile(tile);
+            }
+            this.#layers[LAYER_TERRAIN].drawAfterTiles();
+            tiles = this.getTiles();
+        }
         for (const tile of tiles) {
             for (const layer of activeLayers) {
                 layer.drawTile(tile);
@@ -370,7 +402,7 @@ class Map {
      */
     get(mapX, mapY) {
         const offset = this.getOffset(mapX, mapY);
-        if (offset === null || offset < 0) {
+        if (offset === null || offset < 0 || offset > this.#data.map.length - 1) {
             return null;
         }
         const [tile, terrain, random, minimapInfo] = this.#data.map[offset];
@@ -451,6 +483,9 @@ class Map {
     }
 
     applyTool([start, end], tool) {
+        if (!start || !end) {
+            return;
+        }
         const area = new Path(start, end);
         const coordinates = area.getCoordinates();
         for (const [x, y] of coordinates) {
@@ -460,5 +495,20 @@ class Map {
         this.#layers[LAYER_ROAD].rebuildTiles();
     }
     
-    tick() {}
+    tick() {
+        this.#gameState.tick();
+    }
+    
+    addBuilding(building) {
+        return this.#gameState.addBuilding(building);
+    }
+
+    addFigure(walker) {
+        return this.#gameState.addFigure(walker);
+    }
+
+    getPath(start, dest) {
+        const path = new Path(start, dest);
+        return path.buildPath(this, { direction: true });
+    }
 }

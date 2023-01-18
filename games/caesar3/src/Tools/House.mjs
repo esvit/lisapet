@@ -1,7 +1,8 @@
 import AbstractTool from './AbstractTool.mjs';
-import { TERRAIN_BUILDING, TERRAIN_NONE, TOOLS_HOUSE } from '../constants.mjs';
+import { TERRAIN_NONE, TOOLS_HOUSE } from '../constants.mjs';
+import House from '../Buildings/House.mjs';
 
-export default class House extends AbstractTool {
+export default class HouseTool extends AbstractTool {
     get name() {
         return TOOLS_HOUSE;
     }
@@ -18,10 +19,11 @@ export default class House extends AbstractTool {
 
     changeCell(map, x, y, { terrain }) {
         if (terrain === TERRAIN_NONE) {
-            map.set(x, y, {
-                tileId: 2823,
-                terrain: TERRAIN_BUILDING
-            });
+            map.addBuilding(new House(map, x, y));
+            // map.set(x, y, {
+            //     tileId: 2823,
+            //     terrain: TERRAIN_BUILDING
+            // });
         }
     }
 }

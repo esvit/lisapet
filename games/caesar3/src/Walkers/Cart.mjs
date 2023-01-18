@@ -27,11 +27,10 @@ class Cart {
     this.#walker = val;
   }
 
-  draw(ctx, resourceManager) {
-    const { spriteX, spriteY, direction } = this.#walker;
+  draw(layer, tile, [x, y]) {
+    const { direction } = this.#walker;
     const n = (direction + 1) + 8 * this.cartSprite; // 104
     const num = pad(n, 5);
-    const [img, tileX, tileY, tileW, tileH] = resourceManager.getByAtlas(`carts_${num}`);
 
     let cartDirection = direction; // спереду людини
     if (this.cartPosition === WALKER_CART_BEHIND) {
@@ -42,10 +41,6 @@ class Cart {
       CART_OFFSETS_Y[cartDirection],
     ];
 
-    ctx.drawSprite(
-      img,
-      tileX, tileY, tileW, tileH,
-      spriteX + offset[0], spriteY + offset[1], tileW, tileH
-    );
+    layer.drawTileSprite({ drawX: x + offset[0], drawY: y + offset[1], drawW: 58, drawH: 30 }, `carts_${num}`);
   }
 }

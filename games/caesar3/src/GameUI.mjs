@@ -18,6 +18,10 @@ class GameUI extends EventEmitter {
 
     #map = null;
 
+    #moneyStat = null;
+    #populationStat = null;
+    #yearStat = null;
+
     #selectedTool = null;
 
     constructor({ di }) {
@@ -27,6 +31,9 @@ class GameUI extends EventEmitter {
         this.#menuOverlays = document.getElementById('menuOverlays');
         this.#menuBuildings = document.getElementById('menuBuildings');
         this.#imgPlaceholder = document.getElementById('imgPlaceholder');
+        this.#moneyStat = document.getElementById('moneyStat');
+        this.#populationStat = document.getElementById('populationStat');
+        this.#yearStat = document.getElementById('yearStat');
 
         this.addEvents();
     }
@@ -51,14 +58,14 @@ class GameUI extends EventEmitter {
             sceneManager.currentScene.map = new Map(this.#di, mapData);
             sceneManager.currentScene.resize();
         };
-        document.getElementById('loadSaveGame').onclick = async (e) => {
-            e.preventDefault();
-            const resourceManager = this.#di.get('ResourceManager');
-            const sceneManager = this.#di.get('SceneManager');
-            const mapData = await resourceManager.loadJsonByUrl('maps/saved_game.sav.json');
-            sceneManager.currentScene.map = new Map(this.#di, mapData);
-            sceneManager.currentScene.resize();
-        };
+        // document.getElementById('loadSaveGame').onclick = async (e) => {
+        //     e.preventDefault();
+        //     const resourceManager = this.#di.get('ResourceManager');
+        //     const sceneManager = this.#di.get('SceneManager');
+        //     const mapData = await resourceManager.loadJsonByUrl('maps/saved_game.sav.json');
+        //     sceneManager.currentScene.map = new Map(this.#di, mapData);
+        //     sceneManager.currentScene.resize();
+        // };
         document.getElementById('showMissionDialog').onclick = (e) => {
             e.preventDefault();
             this.showMissionDialog();
@@ -190,5 +197,15 @@ class GameUI extends EventEmitter {
 
     selectTool(name) {
         this.#imgPlaceholder.setAttribute('class', `img-placeholder tool-${name}`);
+    }
+    
+    tick() {
+        if (!this.#map) {
+            return;
+        }
+        document.querySelector('.stats').style.display = 'flex';
+        this.#moneyStat.innerText = `Dn ${this.#map.state.funds}`;
+        this.#populationStat.innerText = `Pop ${this.#map.state.population}`;
+        this.#yearStat.innerText = `Feb 332 BC`;
     }
 }

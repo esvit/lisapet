@@ -108,6 +108,9 @@ class GameScene extends Scene {
     }
     
     resize() {
+        if (!this.#map) {
+            return;
+        }
         this.#map.visibleAreaSize = [this.#drawingContext.width, this.#drawingContext.height];
     }
 
@@ -130,8 +133,9 @@ class GameScene extends Scene {
             if (!this.#map) {
                 return;
             }
+            this.#gameUI.tick();
             this.#map.tick()
-        }, 100);
+        }, 40);
         setInterval(() => {
             if (!this.#map) {
                 return;

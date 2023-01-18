@@ -2,14 +2,16 @@ export const MAP_MOVE_BORDER = 50; // Зона краю коли почне ру
 
 export const LAYER_TERRAIN = 2;
 export const LAYER_ROAD = 4;
-export const LAYER_NATURE = 8;
+export const LAYER_BUILDINGS = 8;
+export const LAYER_FIGURES = 16;
 export const LAYER_COLOR = 0x4000;
 export const LAYER_GRID = 0x8000;
 
 export const LAYERS = [
     { id: LAYER_TERRAIN, title: 'Terrain' },
     { id: LAYER_ROAD, title: 'Road' },
-    { id: LAYER_NATURE, title: 'Nature' },
+    { id: LAYER_BUILDINGS, title: 'Buildings' },
+    { id: LAYER_FIGURES, title: 'Figures' },
     { id: LAYER_COLOR, title: 'Colors' },
     { id: LAYER_GRID, title: 'Grid' },
 ];
@@ -68,6 +70,10 @@ export const TERRAIN_WALL_OR_GATEHOUSE = TERRAIN_WALL | TERRAIN_GATEHOUSE;
 export const TERRAIN_NOT_CLEAR = TERRAIN_TREE | TERRAIN_ROCK | TERRAIN_WATER | TERRAIN_BUILDING | TERRAIN_SHRUB
                                 | TERRAIN_GARDEN | TERRAIN_ROAD | TERRAIN_AQUEDUCT | TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP
                                 | TERRAIN_RUBBLE | TERRAIN_WALL | TERRAIN_GATEHOUSE;
+
+export const TERRAIN_PATH_ROAD = TERRAIN_ROAD | TERRAIN_MEADOW;
+export const TERRAIN_PATH_IMMIGRANT = TERRAIN_TREE | TERRAIN_ROCK | TERRAIN_WATER | TERRAIN_BUILDING | TERRAIN_SHRUB
+                                | TERRAIN_GARDEN | TERRAIN_RUBBLE | TERRAIN_WALL;
 // 0xd17f
 export const TERRAIN_CLEARABLE  = TERRAIN_TREE | TERRAIN_BUILDING | TERRAIN_SHRUB
                                 | TERRAIN_GARDEN | TERRAIN_ROAD | TERRAIN_AQUEDUCT
