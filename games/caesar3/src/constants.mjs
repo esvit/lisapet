@@ -114,6 +114,7 @@ export const TILE_SIZE_5X = 8;
 export const TOOLS_HOUSE = 'house';
 export const TOOLS_SHOVEL = 'shovel';
 export const TOOLS_ROAD = 'road';
+export const TOOLS_BUILDING = 'building';
 
 
 export const WALKER_DIRECTION_NORTH = 1;

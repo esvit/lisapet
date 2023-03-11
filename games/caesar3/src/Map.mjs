@@ -77,6 +77,8 @@ class Map {
 
     #gameState = null;
     
+    #hoverCell = null;
+    
     constructor(di, mapData) {
         this.#di = di;
         this.#data = mapData;
@@ -218,10 +220,7 @@ class Map {
     }
 
     set selectedArea(val) {
-        this.#selectedArea = val ? [
-            this.fromCordinates(...val[0]),
-            this.fromCordinates(...val[1])
-        ] : null;
+        this.#selectedArea = val || null;
     }
 
     get selectedAreaTool() {
@@ -302,14 +301,14 @@ class Map {
         if (this.#enabledLayers && LAYER_TERRAIN) {
             this.#layers[LAYER_TERRAIN].drawBeforeTiles();
             for (const tile of tiles) {
-                this.#layers[LAYER_TERRAIN].drawTile(tile);
+                this.#layers[LAYER_TERRAIN].drawTile(tile, this.#hoverCell && this.#hoverCell[0] === tile.mapX && this.#hoverCell[1] === tile.mapY);
             }
             this.#layers[LAYER_TERRAIN].drawAfterTiles();
             tiles = this.getTiles();
         }
         for (const tile of tiles) {
             for (const layer of activeLayers) {
-                layer.drawTile(tile);
+                layer.drawTile(tile, this.#hoverCell && this.#hoverCell[0] === tile.mapX && this.#hoverCell[1] === tile.mapY);
             }
         }
         for (const layer of activeLayers) {
@@ -355,7 +354,7 @@ class Map {
     * getTiles(flags = null) {
         const order = this.getDrawOrder();
         for (const { x: mapX, y: mapY } of order) {
-            const [drawX, drawY, drawW, drawH] = this.toCordinates(mapX, mapY, true);
+            const [drawX, drawY, drawW, drawH] = this.toCordinates(mapX, mapY);
             if (!this.isTileVisible(drawX, drawY)) {
                 continue;
             }
@@ -464,11 +463,16 @@ class Map {
         };
     }
 
-    mouseMove(x, y) {
+    mouseMove(mapX, mapY) {
+        this.#hoverCell = [mapX, mapY];
+
         if (this.#layers[LAYER_GRID]) {
-            this.#layers[LAYER_GRID].mouseMove(x, y);
+            this.#layers[LAYER_GRID].mouseMove(mapX, mapY);
         }
-        
+        if (this.#selectedAreaTool) {
+            this.#selectedAreaTool.mouseMove(this, [mapX, mapY]);
+        }
+
         // for (const walker of this.walkers.walkers) {
         //     walker.isHovered = false;
         // }
@@ -481,17 +485,8 @@ class Map {
         //     }
         // }
     }
-
-    applyTool([start, end], tool) {
-        if (!start || !end) {
-            return;
-        }
-        const area = new Path(start, end);
-        const coordinates = area.getCoordinates();
-        for (const [x, y] of coordinates) {
-            const tile = this.get(x, y);
-            tool.changeCell(this, x, y, tile);
-        }
+    
+    rebuildRoad() {
         this.#layers[LAYER_ROAD].rebuildTiles();
     }
     

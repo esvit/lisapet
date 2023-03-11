@@ -17,7 +17,7 @@ export default class TerrainLayer extends AbstractLayer {
     }
   }
 
-  drawTile(tile) {
+  drawTile(tile, isHovered) {
     const { mapX, mapY, terrain, random } = tile;
     const tileSprite = this.getTile(tile);
     if (!tileSprite) {
@@ -25,15 +25,21 @@ export default class TerrainLayer extends AbstractLayer {
     }
     if (this.#selectedTool && this.#selectedZone && this.#selectedZone.inArea(mapX, mapY)) {
       if (this.#selectedTool.drawPreviewCell(this, mapX, mapY, tile)) {
+        if (isHovered) {
+          this.#selectedTool.drawHoverCell(this, mapX, mapY, tile);
+        }
         return;
       }
     }
-
     if (terrain & TERRAIN_ROAD) {
       const randTile = this.getRandomTerrain(random);
       this.drawTileSprite(tile, randTile);
     }
     this.drawTileSprite(tile, tileSprite);
+    
+    if (this.#selectedTool && isHovered) {
+      this.#selectedTool.drawHoverCell(this, mapX, mapY, tile);
+    }
   }
 
   getRandomTerrain(random) {

@@ -1,7 +1,84 @@
-import {LAYER_TERRAIN, LAYERS} from './constants.mjs';
+import {BUILDING_ENGINEERS_POST, LAYER_TERRAIN, LAYERS} from './constants.mjs';
 import EventEmitter from '../../../src/EventEmitter.mjs';
 import Map from './Map.mjs';
-import { addClass, removeClass } from './helpers/dom.mjs';
+import Locale from './Locale.mjs';
+import {addClass, addEventOnce, removeClass} from './helpers/dom.mjs';
+import Shovel from './Tools/Shovel.mjs';
+import House from './Tools/House.mjs';
+import Road from './Tools/Road.mjs';
+import Building from './Tools/Building.mjs';
+
+const BUTTONS = [
+    { tool: 'house', icon: 'house', title: Locale.t('house') },
+    { tool: 'shovel', icon: 'shovel', title: Locale.t('shovel') },
+    { tool: 'road', icon: 'road' },
+    {
+        building: 'water',
+        icon: 'water',
+        list: [
+            { building: 'well', price: 100, title: Locale.t('wellTitle') },
+        ]
+    },
+    {
+        building: 'medical',
+        icon: 'medical',
+        list: [
+            // { building: 'hospital', price: 100 },
+        ]
+    },
+    {
+        building: 'gods',
+        icon: 'gods',
+        list: [
+            // { building: 'temple', price: 100 },
+        ]
+    },
+    {
+        building: 'edu',
+        icon: 'edu',
+        list: [
+            // { building: 'temple', price: 100 },
+        ]
+    },
+    {
+        building: 'ent',
+        icon: 'ent',
+        list: [
+            { building: 'theater', price: 100, title: Locale.t('theaterTitle') },
+        ]
+    },
+    {
+        building: 'gov',
+        icon: 'gov',
+        list: [
+            { building: 'temple', price: 100, title: Locale.t('templeTitle') },
+        ]
+    },
+    {
+        building: 'eng',
+        icon: 'eng',
+        list: [
+            { buildingId: BUILDING_ENGINEERS_POST, price: 100, title: Locale.t('engineerPostTitle') },
+        ]
+    },
+    {
+        building: 'prot',
+        icon: 'prot',
+        list: [
+            // { building: 'engineer-post', price: 100, title: Locale.t('engineerPostTitle') },
+        ]
+    },
+    {
+        building: 'mar',
+        icon: 'mar',
+        list: [
+            // { building: 'engineer-post', price: 100 },
+        ]
+    },
+    { action: 'cancel', icon: 'cancel' },
+    { action: 'messages', icon: 'messages' },
+    { action: 'bell', icon: 'bell' }
+];
 
 export default
 class GameUI extends EventEmitter {
@@ -23,9 +100,7 @@ class GameUI extends EventEmitter {
     #populationStat = null;
     #yearStat = null;
     #buildButtons = null;
-    #nav = null;
-    #sidebar = null;
-    #ui = null;
+    #buttons = {};
 
     #selectedTool = null;
 
@@ -40,19 +115,30 @@ class GameUI extends EventEmitter {
         this.#populationStat = document.getElementById('populationStat');
         this.#yearStat = document.getElementById('yearStat');
         this.#buildButtons = document.getElementById('build-buttons');
-        this.#nav = document.getElementById('main-navbar');
-        this.#sidebar = document.getElementById('main-sidebar');
-        this.#ui = [this.#nav, this.#sidebar];
 
+        this.initButtons();
         this.addEvents();
     }
     
-    hideUi() {
-        addClass(this.#ui, 'd-none');
-    }
-    
-    showUi() {
-        removeClass(this.#ui, 'd-none');
+    initButtons() {
+        for (const button of BUTTONS) {
+            const btn = document.createElement('button');
+            if (button.tool) {
+                btn.setAttribute('data-tool', button.tool);
+            }
+            if (button.building) {
+                btn.setAttribute('data-building', button.building);
+            }
+            if (button.action) {
+                btn.setAttribute('data-action', button.action);
+            }
+            if (button.title) {
+                btn.setAttribute('title', button.title);
+            }
+            addClass(btn, 'btn', `icon-${button.icon}`);
+            this.#buildButtons.appendChild(btn);
+            this.#buttons[button.tool || button.building || button.action] = btn;
+        }
     }
 
     bind(map) {
@@ -81,9 +167,8 @@ class GameUI extends EventEmitter {
         for (const btn of document.querySelectorAll('[data-building]')) {
             btn.onclick = (e) => {
                 e.preventDefault();
-                this.toggleBuildings();
-
-                this.#map.addImmigrantWalker();
+                const groupName = btn.getAttribute('data-building');
+                this.toggleBuildings(groupName, true);
             };
         }
         const emit = this.emit.bind(this);
@@ -91,7 +176,13 @@ class GameUI extends EventEmitter {
             btn.onclick = function (e) {
                 e.preventDefault();
                 const toolName = this.getAttribute('data-tool');
-                emit('tool', toolName);
+                let tool;
+                switch (toolName) {
+                case 'road': tool = new Road(); break;
+                case 'house': tool = new House(); break;
+                case 'shovel': tool = new Shovel(); break;
+                }
+                emit('tool', tool);
             };
         }
     }
@@ -133,16 +224,36 @@ class GameUI extends EventEmitter {
         return dialog;
     }
 
-    showMissionDialog() {
-        this.showDialog('missionDialog');
-    }
-
     toggleOverlays() {
         this.#menuOverlays.classList.toggle('show');
     }
 
-    toggleBuildings() {
-        this.#menuBuildings.classList.toggle('show');
+    toggleBuildings(group, show = null) {
+        if (show === null) {
+            this.#menuBuildings.classList.toggle('show');
+        } else if (show) {
+            this.#menuBuildings.classList.add('show');
+        } else {
+            this.#menuBuildings.classList.remove('show');
+        }
+        const groupButton = BUTTONS.find((button) => button.building === group);
+        this.#menuBuildings.innerHTML = '';
+        for (const item of groupButton.list) {
+            const button = document.createElement('button');
+            button.setAttribute('title', item.title);
+            let title = item.title;
+            if (item.price) {
+                title += `<span>${item.price}Dn</span>`;
+            }
+            addClass(button, 'btn', 'btn-default', 'btn-block');
+            button.innerHTML = title;
+            addEventOnce(button, 'click', (e) => {
+                const tool = new Building(item.buildingId, item.price);
+                this.emit('tool', tool);
+                this.toggleBuildings(group, false);
+            });
+            this.#menuBuildings.appendChild(button);
+        }
     }
 
     showVideoDialog() {

@@ -223,7 +223,11 @@
     padding-left: 25px;
     width: 39px;
     height: 26px;
-    margin: 2px 5px 8px 2px;
+    margin: 2px 9px 8px 2px;
+    
+    &:nth-child(3n) {
+      margin-right: 0;
+    }
   }
   .btn.icon-house {
     background-position-y: 0;

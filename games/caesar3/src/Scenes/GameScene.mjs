@@ -1,10 +1,8 @@
 import Scene from '../../../../src/Scene.mjs';
 import { moveMapNearBorder, outMapNearBorder } from '../helpers/moveMapNearBorder.mjs';
 import { MOUSE_RIGHT_BUTTON } from '../../../../src/InputManager.mjs';
-import { TOOLS_HOUSE, TOOLS_ROAD, TOOLS_SHOVEL, RESOURCE_ATLASES } from '../constants.mjs';
-import Shovel from '../Tools/Shovel.mjs';
-import House from '../Tools/House.mjs';
-import Road from '../Tools/Road.mjs';
+import { RESOURCE_ATLASES } from '../constants.mjs';
+import {addEventOnce} from "../helpers/dom.mjs";
 
 export default
 class GameScene extends Scene {
@@ -31,11 +29,11 @@ class GameScene extends Scene {
      */
     #selectedTool = null;
 
-    #tools = {};
-
     #walkers = [];
 
     #mapImage = null;
+
+    #tickTimer = null;
 
     constructor({ di, canvas, DrawingContext, ResourceManager, InputManager, GameUI }) {
         super();
@@ -46,12 +44,6 @@ class GameScene extends Scene {
         this.#resourceManager = ResourceManager;
         this.#inputManager = InputManager;
         this.#gameUI = GameUI;
-
-        this.#tools = {
-            [TOOLS_HOUSE]: new House(),
-            [TOOLS_SHOVEL]: new Shovel(),
-            [TOOLS_ROAD]: new Road(),
-        };
     }
 
     get map() {
@@ -125,17 +117,11 @@ class GameScene extends Scene {
             this.resize();
             this.#map.move(-e.deltaX, -e.deltaY);
         }, { passive: false });
-        this.#gameUI.on('tool', (name) => {
-            this.selectedTool = this.#tools[name];
+        this.#gameUI.on('tool', (tool) => {
+            this.selectedTool = tool;
         });
 
-        setInterval(() => {
-            if (!this.#map) {
-                return;
-            }
-            this.#gameUI.tick();
-            this.#map.tick()
-        }, 40);
+        this.setSpeed(7);
         setInterval(() => {
             if (!this.#map) {
                 return;
@@ -143,6 +129,29 @@ class GameScene extends Scene {
             const image = this.#map.redraw();
             this.#mapImage = image;
         }, 100);
+    }
+
+    setSpeed(speed) {
+        const MILLIS_PER_TICK_PER_SPEED = [
+            702, 502, 352, 242, 162, 112, 82, 57, 37, 22, 16
+        ];
+        if (this.#tickTimer) {
+            clearInterval(this.#tickTimer);
+        }
+        if (speed > 0) {
+            this.#tickTimer = setInterval(() => {
+                if (!this.#map) {
+                    return;
+                }
+                this.#gameUI.tick();
+                this.#map.tick();
+                window.tick = window.tick || 0;
+                window.tick++;
+                if (window.tick > 999) {
+                    window.tick = 0;
+                }
+            }, MILLIS_PER_TICK_PER_SPEED[speed]);
+        }
     }
 
     click({ x, y }) {
@@ -157,14 +166,15 @@ class GameScene extends Scene {
         if (!this.#map) {
             return;
         }
-        if (this.#mouseSelectArea) {
-            this.#mouseSelectArea[1] = [x, y];
+        const [mapX, mapY] = this.#map.fromCordinates(x, y);
+        if (this.#mouseSelectArea && this.#selectedTool.isDraggable) {
+            this.#mouseSelectArea[1] = [mapX, mapY];
             this.#map.selectedAreaTool = this.#selectedTool; // передаємо інструмент в карту, щоб там вже намалювати потрібне
             this.#map.selectedArea = this.#mouseSelectArea;
-        } else {
-            this.#map.selectedArea = null;
+        } else if (this.#map.selectedArea) {
+            this.#map.selectedArea[1] = [null, null];
         }
-        this.#map.mouseMove(x, y);
+        this.#map.mouseMove(mapX, mapY);
 
         moveMapNearBorder(this.#map, this.#canvas, { x, y });
     }
@@ -212,13 +222,20 @@ class GameScene extends Scene {
             }
             return;
         }
-        if (this.#map.selectedAreaTool) {
+        if (this.#selectedTool && !this.#selectedTool.isDraggable) {
+            const [mapX, mapY] = this.#map.fromCordinates(x, y);
             this.#mouseSelectArea = [
-                [x, y],
+                [mapX, mapY],
                 [null, null]
             ];
-            this.mouseUpHandler = this.mouseup.bind(this);
-            window.addEventListener('mouseup', this.mouseUpHandler);
+            addEventOnce(window, 'mouseup', this.mouseup.bind(this));
+        } else if (this.#map.selectedAreaTool) {
+            const [mapX, mapY] = this.#map.fromCordinates(x, y);
+            this.#mouseSelectArea = [
+                [mapX, mapY],
+                [null, null]
+            ];
+            addEventOnce(window, 'mouseup', this.mouseup.bind(this));
         }
     }
 
@@ -226,14 +243,12 @@ class GameScene extends Scene {
         if (!this.#map) {
             return;
         }
-        if (this.#map.selectedArea) {
-            this.#map.applyTool(this.#map.selectedArea, this.#selectedTool);
+        if (this.#selectedTool) {
+            if (this.#selectedTool.apply(this.#map, this.#mouseSelectArea || this.#map.selectedArea)) {
+                this.selectedTool = null;
+            }
         }
         this.#map.selectedArea = null;
         this.#mouseSelectArea = null;
-        if (this.mouseUpHandler) {
-            window.removeEventListener('mouseup', this.mouseUpHandler);
-            this.mouseUpHandler = null;
-        }
     }
 }

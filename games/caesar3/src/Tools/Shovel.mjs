@@ -7,6 +7,7 @@ import {
     TOOLS_SHOVEL
 } from '../constants.mjs';
 import { getIdByTile } from '../helpers/tileId.mjs';
+import Path from "../Path.mjs";
 
 export default class Shovel extends AbstractTool {
     get name() {
@@ -30,6 +31,18 @@ export default class Shovel extends AbstractTool {
                 minimapInfo: TILE_SIZE_1X,
                 terrain: TERRAIN_NONE
             });
+        }
+    }
+
+    apply(map, [start, end]) {
+        if (!start || !end) {
+            return;
+        }
+        const area = new Path(start, end);
+        const coordinates = area.getCoordinates();
+        for (const [x, y] of coordinates) {
+            const tile = map.get(x, y);
+            this.changeCell(map, x, y, tile);
         }
     }
 }

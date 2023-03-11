@@ -43,6 +43,31 @@ class AbstractLayer {
         }
     }
 
+    drawTileSpriteOnTop(tile, name, [dx, dy] = [0, 0]) {
+        const { drawX, drawY, drawW, drawH, tileSize = 1 } = tile;
+
+        const tileName = Array.isArray(name) ? `${name[0]}_${pad(name[1], 5)}` : name;
+        const sprite = this.resourceManager.getByAtlas(tileName);
+        if (sprite) {
+            const [img, tileX, tileY, tileW, tileH] = sprite;
+            let x = drawX - drawW / 2;
+            let y = drawY - drawH - (tileH - drawH) + drawH / 2 * tileSize - drawH / 2;
+            
+            if (dx) {
+                x += dx;
+            }
+            if (dy) {
+                y += dy;
+            }
+            
+            this.drawingContext.drawSprite(
+                img,
+                tileX, tileY, tileW, tileH,
+                x, y, tileW, tileH
+            );
+        }
+    }
+
     drawColorTile(mapX, mapY, color) {
         const { tileHeight, tileWidth } = this.map;
         const halfTileWidth = tileWidth / 2;

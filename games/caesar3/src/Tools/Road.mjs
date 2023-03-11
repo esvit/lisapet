@@ -1,13 +1,16 @@
 import AbstractTool from './AbstractTool.mjs';
 import {
+    BUILDING_HOUSE_VACANT_LOT,
     DIRECTION_EAST,
     DIRECTION_NONE,
-    DIRECTION_NORTH, DIRECTION_SOUTH, DIRECTION_WEST, TERRAIN_PATH_ROAD,
+    DIRECTION_NORTH, DIRECTION_SOUTH, DIRECTION_WEST, TERRAIN_NOT_CLEAR, TERRAIN_PATH_ROAD,
     TERRAIN_ROAD,
     TOOLS_ROAD
 } from '../constants.mjs';
 import {pad} from "../helpers/math.mjs";
 import {getIdByTile} from "../helpers/tileId.mjs";
+import Path from "../Path.mjs";
+import {getTileByBuildingId} from "../helpers/buildingTileId.mjs";
 
 export default class Road extends AbstractTool {
     #buildedPath = null;
@@ -18,6 +21,19 @@ export default class Road extends AbstractTool {
 
     prepareArea(map, area) {
         this.#buildedPath = area.buildPath(map, { occupied: true, mapOccupied: true }, TERRAIN_PATH_ROAD);
+    }
+
+    apply(map, [start, end]) {
+        if (!start || !end) {
+            return;
+        }
+        const area = new Path(start, end);
+        const coordinates = area.getCoordinates();
+        for (const [x, y] of coordinates) {
+            const tile = map.get(x, y);
+            this.changeCell(map, x, y, tile);
+        }
+        map.rebuildRoad();
     }
 
     drawPreviewCell(layer, mapX, mapY, tile) {
@@ -52,6 +68,14 @@ export default class Road extends AbstractTool {
                 terrain: TERRAIN_ROAD
             });
         }
+    }
+
+    drawHoverCell(layer, mapX, mapY, tile) {
+        const isValid = !(tile.terrain & TERRAIN_NOT_CLEAR);
+        const res = 'land2a';
+        const tileId = this.getTileByDirection(DIRECTION_NORTH & DIRECTION_EAST & DIRECTION_SOUTH & DIRECTION_WEST);
+        layer.drawTileSprite(tile, [res, tileId]);
+        layer.drawColorTile(mapX, mapY, isValid ? '#3cb04366' : '#ff000066');
     }
     
     getTileByDirection(direction) {

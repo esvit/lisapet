@@ -6,8 +6,8 @@ class GridLayer extends AbstractLayer {
 
     #selectedTile = null;
 
-    mouseMove(x, y) {
-        this.#selectedTile = this.map.fromCordinates(x, y);
+    mouseMove(mapX, mapY) {
+        this.#selectedTile = [mapX, mapY];
     }
 
     drawAfterTiles() {
