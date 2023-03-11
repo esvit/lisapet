@@ -24,319 +24,315 @@
             overflow: hidden;
             position: relative;
             min-height: 100vh;
+            background: #000;
         }
     </style>
     <link rel="stylesheet" href="assets/css/ui.css">
 </head>
 <body>
-
 <div class="caesar3_ui">
-
-    <nav>
-        <ul>
-            <li>
-                <a href="javascript:;">File</a>
-                <ul class="dropdown">
-                    <li><a href="" id="newGame">New empty map</a></li>
-                    <li><a href="" id="loadGame">Load scenario</a></li>
-<!--                    <li><a href="" id="loadSaveGame">Load saved game</a></li>-->
-                </ul>
-            </li>
-            <!--li><a href="javascript:;">Options</a></li>
-            <li><a href="javascript:;">Help</a></li>
-            <li>
-                <a href="javascript:;">Advisors</a>
-            </li-->
-            <li>
-                <a href="javascript:;">Debug</a>
-                <ul class="dropdown">
-                    <li><a href="" id="showMissionDialog">Mission dialog</a></li>
-                    <li><a href="" id="showVideoDialog">Video dialog</a></li>
-                    <li><a href="" id="showNameDialog">Name dialog</a></li>
-                </ul>
-            </li>
-        </ul>
-
-        <div class="stats" style="display: none">
-            <div class="stat" id="moneyStat"></div>
-            <div class="stat" id="populationStat"></div>
-            <div class="stat stat-year" id="yearStat"></div>
+    <audio autoplay loop controls id="audio" class="d-none"><source src="assets/audio/background.mp3" type="audio/mp3" /></audio>
+    <div id="pre-screen" class="game-screen in">
+        Loading...<br />Завантаження...
+    </div>
+    <div id="menu-screen" class="game-screen">
+        <div class="bg">
+            <iframe src="https://www.youtube.com/embed/06XCqFX1wq0?verison=3&controls=0&autoplay=1&mute=1&playsinline=1&loop=1&playlist=06XCqFX1wq0"></iframe>
         </div>
-    </nav>
+        <div class="logo"></div>
+        <div class="logo-text"></div>
+        <div class="person"></div>
+        
+        <div class="menu">
+           <div id="google-button" class="d-none"></div>
+            
+            <div>
+                <button id="startNewGame">Почати нову гру</button>
+            </div>
+        </div>
+    </div>
 
-    <main>
-        <div class="map" id="mapContainer">
-
-            <dialog id="missionDialog">
-                <div class="dialog-content">
-                    <h2>The New Governor</h2>
-
-                    <div class="mb-2">A Village is Born</div>
-
-                    <div class="scrollable-container mb-2">
-                        <div class="scrollable">
-                            <p>Objectives</p>
-
-                            <button class="btn btn-block btn-default" disabled>Population of 150</button>
-                            <button class="btn btn-block btn-default" disabled>Imediate goals build some houses.</button>
-                        </div>
+    <div id="main-screen" class="game-screen">
+        <nav id="main-navbar">
+            <ul>
+                <li>
+                    <a href="javascript:;">Гра</a>
+                    <ul class="dropdown">
+<!--                        <li><a href="" id="loadGame">Load scenario</a></li>-->
+                        <li><a href="" id="backToMenu">Вийти з гри</a></li>
+    <!--                    <li><a href="" id="loadSaveGame">Load saved game</a></li>-->
+                    </ul>
+                </li>
+                <!--li><a href="javascript:;">Options</a></li>
+                <li><a href="javascript:;">Help</a></li>
+                <li>
+                    <a href="javascript:;">Advisors</a>
+                </li-->
+                <li>
+                    <a href="javascript:;">Debug</a>
+                    <ul class="dropdown">
+                        <li><a href="" id="showVideoDialog">Video dialog</a></li>
+                    </ul>
+                </li>
+            </ul>
+    
+            <div class="stats" style="display: none">
+                <div class="stat" id="moneyStat"></div>
+                <div class="stat" id="populationStat"></div>
+                <div class="stat stat-year" id="yearStat"></div>
+            </div>
+        </nav>
+    
+        <main>
+            <div class="map" id="mapContainer">
+    
+                <div class="d-overlays-menu" id="menuOverlays"></div>
+    
+                <div class="d-buildings-menu" id="menuBuildings">
+                    <button class="btn btn-block btn-default">
+                        Well
+                    </button>
+                    <button class="btn btn-block btn-default">
+                        Farm
+                        <span>40Dn</span>
+                    </button>
+                    <button class="btn btn-block btn-default">
+                        Water
+                        <span>40Dn</span>
+                    </button>
+                </div>
+    
+                <canvas id="main"></canvas>
+            </div>
+    
+            <aside id="main-sidebar">
+                <div class="aside-buttons">
+                    <div class="top-buttons">
+                        <button class="btn btn-overlay" id="btnOverlay">Overlay</button>
+                        <button disabled class="btn btn-toggle-sidebar"></button>
                     </div>
-                    <div class="scrollable-container mb-2">
-                        <div class="scrollable" style="height: 200px;">
-                            <p>Let your gubernatorial training begin!</p>
-                            <p>First, you must learn the basics of constructing Roman settlements.</p>
-                            <p>Build areas of housing, and you'll soon see people move in to your city.</p>
-
-                            <img class="img-center" src="assets/images/tutorial/img1.png" />
-
-                            <p>Paths</p>
-                            <p>You can click and drag the mouse to build lengths of path at once.</p>
-
-                            <img class="img-center" src="assets/images/tutorial/img2.png" />
-                            <p>You can click and drag the mouse to build lengths of path at once.</p>
-                            <p>Plan paths carefully, with as few intersections as possible, to ensure people will walk where you want them to. At every intersection, walkers must choose which way to go. Each intersection lessens your control over their actual routes.</p>
-
-                            <img class="img-center" src="assets/images/tutorial/img3.png" />
-                        </div>
+    
+                    <div class="minimap">
+                        <canvas id="minimap"></canvas>
                     </div>
-
-                    <div class="d-flex">
-                        <div class="spacer"></div>
-                        <button data-action="close" class="btn btn-block btn-round-next">To the city</button>
+    
+                    <div class="btn-row">
+                        <button class="btn btn-senat"></button>
+                        <button class="btn btn-map"></button>
+                    </div>
+    
+                    <div class="btn-row">
+                        <button class="btn btn-doc"></button>
+                        <button class="btn btn-north"></button>
+                        <button class="btn btn-rotate-cw"></button>
+                        <button class="btn btn-rotate-ccw"></button>
+                    </div>
+    
+                    <div class="img-placeholder" id="imgPlaceholder"></div>
+    
+                    <div id="build-buttons" class="build-buttons">
+                        <button data-tool="house" class="btn icon-house"></button>
+                        <button data-tool="shovel" class="btn icon-shovel"></button>
+                        <button data-tool="road" class="btn icon-road"></button>
+                        <button data-building="water" class="btn icon-water"></button>
+                        <button data-building="medical" class="btn icon-medical"></button>
+                        <button data-building="gods" disabled class="btn icon-gods"></button>
+                        <button data-building="edu" class="btn icon-edu"></button>
+                        <button data-building="house" class="btn icon-ent"></button>
+                        <button data-building="house" class="btn icon-gov"></button>
+                        <button data-building="house" class="btn icon-eng"></button>
+                        <button data-building="house" class="btn icon-prot"></button>
+                        <button data-building="house" class="btn icon-mar"></button>
+                        <button data-building="house" disabled class="btn icon-cancel"></button>
+                        <button data-building="house" class="btn icon-messages">0</button>
+                        <button data-building="house" disabled class="btn icon-bell"></button>
                     </div>
                 </div>
-                <div class="dialog-corners"></div>
-            </dialog>
+                <div class="aside-placeholder"></div>
+            </aside>
+        </main>
+    </div>
 
-            <dialog id="nameDialog">
-                <div class="dialog-content">
-                    <h2>Please enter your name</h2>
+    <dialog id="nameDialog">
+        <div class="dialog-content">
+            <h2>Вкажіть своє імʼя</h2>
 
-                    <div class="scrollable-container noscroll mb-2">
-                        <div>
-                            <input class="form-control" value="The new governor" type="text" />
-                        </div>
-                    </div>
-                    <div class="d-flex">
-                        <div class="spacer"></div>
-                        <button data-action="close" class="btn btn-block btn-round-next">Continue</button>
-                    </div>
+            <div class="scrollable-container noscroll mb-2">
+                <div>
+                    <input class="form-control" value="" id="nameDialog-name" type="text" />
                 </div>
-                <div class="dialog-corners"></div>
-            </dialog>
+            </div>
+            <div class="d-flex">
+                <div class="spacer"></div>
+                <button data-action="close" class="btn btn-block btn-round-next">Продовжити</button>
+            </div>
+        </div>
+        <div class="dialog-corners"></div>
+    </dialog>
 
-            <dialog id="videoDialog" class="video-dialog">
-                <video id="video" src="assets/videos/urgent_message1.mp4"></video>
+    <dialog id="missionDialog">
+        <div class="dialog-content">
+            <h2>The New Governor</h2>
 
-                <div class="scrollable-container noscroll">
-                    <div>
-                        <p>Jul 345 BC&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;To Player</p>
-                        <p>Rome has need of the following goods. Please arrange for their swift dispatch.</p>
+            <div class="mb-2">A Village is Born</div>
 
-                    </div>
+            <div class="scrollable-container mb-2">
+                <div class="scrollable">
+                    <p>Objectives</p>
+
+                    <button class="btn btn-block btn-default" disabled>Population of 150</button>
+                    <button class="btn btn-block btn-default" disabled>Imediate goals build some houses.</button>
                 </div>
+            </div>
+            <div class="scrollable-container mb-2">
+                <div class="scrollable" style="height: 200px;">
+                    <p>Let your gubernatorial training begin!</p>
+                    <p>First, you must learn the basics of constructing Roman settlements.</p>
+                    <p>Build areas of housing, and you'll soon see people move in to your city.</p>
 
-                <div class="dialog-content">
-                    <div class="d-flex">
-                        <a href="#" class="btn btn-block btn-sm-question"></a>
-                        <div class="spacer text-center">
-                            Emperor requests goods
-                        </div>
-                        <a href="#" data-action="close" class="btn btn-block btn-sm-next"></a>
-                    </div>
+                    <img class="img-center" src="assets/images/tutorial/img1.png" />
+
+                    <p>Paths</p>
+                    <p>You can click and drag the mouse to build lengths of path at once.</p>
+
+                    <img class="img-center" src="assets/images/tutorial/img2.png" />
+                    <p>You can click and drag the mouse to build lengths of path at once.</p>
+                    <p>Plan paths carefully, with as few intersections as possible, to ensure people will walk where you want them to. At every intersection, walkers must choose which way to go. Each intersection lessens your control over their actual routes.</p>
+
+                    <img class="img-center" src="assets/images/tutorial/img3.png" />
                 </div>
-                <div class="dialog-corners"></div>
-            </dialog>
-
-            <div class="d-overlays-menu" id="menuOverlays"></div>
-
-            <div class="d-buildings-menu" id="menuBuildings">
-                <button class="btn btn-block btn-default">
-                    Well
-                </button>
-                <button class="btn btn-block btn-default">
-                    Farm
-                    <span>40Dn</span>
-                </button>
-                <button class="btn btn-block btn-default">
-                    Water
-                    <span>40Dn</span>
-                </button>
             </div>
 
-            <canvas id="main"></canvas>
+            <div class="d-flex">
+                <div class="spacer"></div>
+                <button data-action="close" class="btn btn-block btn-round-next">To the city</button>
+            </div>
+        </div>
+        <div class="dialog-corners"></div>
+    </dialog>
+
+    <dialog id="terrainInfoDialog">
+        <div class="dialog-content">
+            <div class="scrollable-container noscroll mb-2">
+                <div>
+                    <div>
+                        X: <span data-bind="mapX"></span>, Y: <span data-bind="mapY"></span>,
+                        Tile: <span data-bind="tile"></span>,
+                        Edge: <span data-bind="edge"></span>,
+                        Minimap: <span data-bind="minimapInfo"></span>,
+                        Elevation: <span data-bind="elevation"></span>,
+                        Random: <span data-bind="random"></span>,
+                        BuildingId: <span data-bind="buildingId"></span>,
+                        test: <span data-bind="test"></span>,
+                        Tile size: <span data-bind="tileSize"></span>
+                    </div>
+                    <pre data-bind="terrainInfo"></pre>
+                </div>
+            </div>
+        </div>
+        <div class="dialog-content">
+            <div class="d-flex">
+                <a href="#" class="btn btn-block btn-sm-question"></a>
+                <div class="spacer"></div>
+                <a href="#" data-action="close" class="btn btn-block btn-sm-next"></a>
+            </div>
+        </div>
+        <div class="dialog-corners"></div>
+    </dialog>
+
+    <dialog id="buildingInfo">
+        <div class="dialog-content">
+            <h1 class="text-center">Small case</h1>
+
+            <p>This house cannot evolve, as it does not have access to a local bath-house.</p>
+
+            <div class="scrollable-container noscroll mb-2">
+                <div>
+                    <span class="walking-priest"></span>
+                    <span class="walking-worker"></span>
+                    <span data-bind="housePopulation"></span>
+                    occupants Extra room for
+                    <span data-bind="housePopulationRoom"></span>
+
+                    <div class="row">
+                        <div class="col-4">
+                            <span class="resource wheat"></span>
+                            <span data-bind="inventory.0"></span>
+                        </div>
+                        <div class="col-4">
+                            <span class="resource vegetables"></span>
+                            <span data-bind="inventory.1"></span>
+                        </div>
+                        <div class="col-4">
+                            <span class="resource fruits"></span>
+                            <span data-bind="inventory.2"></span>
+                        </div>
+                        <div class="col-4">
+                            <span class="resource meat"></span>
+                            <span data-bind="inventory.3"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4">
+                            <span class="resource potery"></span>
+                            <span data-bind="inventory.4"></span>
+                        </div>
+                        <div class="col-4">
+                            <span class="resource furniture"></span>
+                            <span data-bind="inventory.5"></span>
+                        </div>
+                        <div class="col-4">
+                            <span class="resource oil"></span>
+                            <span data-bind="inventory.6"></span>
+                        </div>
+                        <div class="col-4">
+                            <span class="resource wine"></span>
+                            <span data-bind="inventory.7"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="dialog-content">
+            <div class="d-flex">
+                <a href="#" class="btn btn-block btn-sm-question"></a>
+                <div class="spacer"></div>
+                <a href="#" data-action="close" class="btn btn-block btn-sm-next"></a>
+            </div>
+        </div>
+        <div class="dialog-corners"></div>
+    </dialog>
+
+    <dialog id="videoDialog" class="video-dialog">
+        <video id="video" src="assets/videos/urgent_message1.mp4"></video>
+
+        <div class="scrollable-container noscroll">
+            <div>
+                <p>Jul 345 BC&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;To Player</p>
+                <p>Rome has need of the following goods. Please arrange for their swift dispatch.</p>
+
+            </div>
         </div>
 
-        <aside>
-            <div class="aside-buttons">
-                <div class="top-buttons">
-                    <button class="btn btn-overlay" id="btnOverlay">Overlay</button>
-                    <button disabled class="btn btn-toggle-sidebar"></button>
+        <div class="dialog-content">
+            <div class="d-flex">
+                <a href="#" class="btn btn-block btn-sm-question"></a>
+                <div class="spacer text-center">
+                    Emperor requests goods
                 </div>
-
-                <div class="minimap">
-                    <canvas id="minimap"></canvas>
-                </div>
-
-                <div class="btn-row">
-                    <button class="btn btn-senat"></button>
-                    <button class="btn btn-map"></button>
-                </div>
-
-                <div class="btn-row">
-                    <button class="btn btn-doc"></button>
-                    <button class="btn btn-north"></button>
-                    <button class="btn btn-rotate-cw"></button>
-                    <button class="btn btn-rotate-ccw"></button>
-                </div>
-
-                <div class="img-placeholder" id="imgPlaceholder"></div>
-
-                <div class="build-buttons">
-                    <button data-tool="house" class="btn icon-house"></button>
-                    <button data-tool="shovel" class="btn icon-shovel"></button>
-                    <button data-tool="road" class="btn icon-road"></button>
-                    <button data-building="house" class="btn icon-water"></button>
-                    <button data-building="house" class="btn icon-medical"></button>
-                    <button data-building="house" disabled class="btn icon-gods"></button>
-                    <button data-building="house" class="btn icon-edu"></button>
-                    <button data-building="house" class="btn icon-ent"></button>
-                    <button data-building="house" class="btn icon-gov"></button>
-                    <button data-building="house" class="btn icon-eng"></button>
-                    <button data-building="house" class="btn icon-prot"></button>
-                    <button data-building="house" class="btn icon-mar"></button>
-                    <button data-building="house" disabled class="btn icon-cancel"></button>
-                    <button data-building="house" class="btn icon-messages">0</button>
-                    <button data-building="house" disabled class="btn icon-bell"></button>
-                </div>
+                <a href="#" data-action="close" class="btn btn-block btn-sm-next"></a>
             </div>
-            <div class="aside-placeholder"></div>
-        </aside>
+        </div>
+        <div class="dialog-corners"></div>
+    </dialog>
 
-        <dialog id="terrainInfoDialog">
-            <div class="dialog-content">
-                <div class="scrollable-container noscroll mb-2">
-                    <div>
-                        <div>
-                            X: <span data-bind="mapX"></span>, Y: <span data-bind="mapY"></span>,
-                            Tile: <span data-bind="tile"></span>,
-                            Edge: <span data-bind="edge"></span>,
-                            Minimap: <span data-bind="minimapInfo"></span>,
-                            Elevation: <span data-bind="elevation"></span>,
-                            Random: <span data-bind="random"></span>,
-                            BuildingId: <span data-bind="buildingId"></span>,
-                            test: <span data-bind="test"></span>,
-                            Tile size: <span data-bind="tileSize"></span>
-                        </div>
-                        <pre data-bind="terrainInfo"></pre>
-                    </div>
-                </div>
-            </div>
-            <div class="dialog-content">
-                <div class="d-flex">
-                    <a href="#" class="btn btn-block btn-sm-question"></a>
-                    <div class="spacer"></div>
-                    <a href="#" data-action="close" class="btn btn-block btn-sm-next"></a>
-                </div>
-            </div>
-            <div class="dialog-corners"></div>
-        </dialog>
-
-        <dialog id="buildingInfo">
-            <div class="dialog-content">
-                <h1 class="text-center">Small case</h1>
-                
-                <p>This house cannot evolve, as it does not have access to a local bath-house.</p>
-                
-                <div class="scrollable-container noscroll mb-2">
-                    <div>
-                        <span class="walking-priest"></span>
-                        <span class="walking-worker"></span>
-                        <span data-bind="housePopulation"></span>
-                        occupants Extra room for
-                        <span data-bind="housePopulationRoom"></span>
-                        
-                        <div class="row">
-                            <div class="col-4">
-                                <span class="resource wheat"></span>
-                                <span data-bind="inventory.0"></span>
-                            </div>
-                            <div class="col-4">
-                                <span class="resource vegetables"></span>
-                                <span data-bind="inventory.1"></span>
-                            </div>
-                            <div class="col-4">
-                                <span class="resource fruits"></span>
-                                <span data-bind="inventory.2"></span>
-                            </div>
-                            <div class="col-4">
-                                <span class="resource meat"></span>
-                                <span data-bind="inventory.3"></span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-4">
-                                <span class="resource potery"></span>
-                                <span data-bind="inventory.4"></span>
-                            </div>
-                            <div class="col-4">
-                                <span class="resource furniture"></span>
-                                <span data-bind="inventory.5"></span>
-                            </div>
-                            <div class="col-4">
-                                <span class="resource oil"></span>
-                                <span data-bind="inventory.6"></span>
-                            </div>
-                            <div class="col-4">
-                                <span class="resource wine"></span>
-                                <span data-bind="inventory.7"></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="dialog-content">
-                <div class="d-flex">
-                    <a href="#" class="btn btn-block btn-sm-question"></a>
-                    <div class="spacer"></div>
-                    <a href="#" data-action="close" class="btn btn-block btn-sm-next"></a>
-                </div>
-            </div>
-            <div class="dialog-corners"></div>
-        </dialog>
-    </main>
-
+    <div id="dialog-backdrop" class="d-none"></div>
 </div>
-
 <script type="module">
-    import DependencyInjection from '/src/DependencyInjection.mjs';
-    import SceneManager from '/src/SceneManager.mjs';
-    import ResourceManager from '/src/ResourceManager.mjs';
-    import DrawingContext from '/src/DrawingContext.mjs';
-    import InputManager from '/src/InputManager.mjs';
-    import GameUI from './src/GameUI.mjs';
-    import GameScene from './src/Scenes/GameScene.mjs';
+    import MenuScene from './src/Scenes/MenuScene.mjs';
 
-    async function bootstrap() {
-        const di = DependencyInjection.createRoot({
-            ResourceManager,
-            DrawingContext,
-            InputManager,
-            GameUI
-        });
-        const mainCanvas = document.getElementById('main');
-        di.set('canvas', mainCanvas);
-
-        const sceneManager = di.get(SceneManager);
-        const drawingContext = di.get(DrawingContext);
-        const resourceManager = di.get(ResourceManager);
-
-        const scene = await sceneManager.loadScene(GameScene);
-
-        drawingContext.bindToElement(document.getElementById('mapContainer'));
-        drawingContext.loop();
-    }
-    bootstrap();
+    const scene = new MenuScene();
+    scene.startMenu();
 </script>
 </body>
 </html>

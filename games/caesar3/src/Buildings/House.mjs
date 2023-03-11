@@ -1,6 +1,8 @@
 import BaseBuilding from './BaseBuilding.mjs';
 import ImmigrantWalker from '../Walkers/ImmigrantWalker.mjs';
 
+const CHECK_TO_ROAD_EXISTS = 10;
+
 export default 
 class House extends BaseBuilding {
   #immigrand = null;
@@ -8,18 +10,26 @@ class House extends BaseBuilding {
   #level = 0;
   
   #road = null;
+
+  #waitFor = 0;
+  
+  #checksOfRoadExists = 0;
   
   constructor(map, x, y) {
     super(map, x, y);
-    
-    this.#road = this.detectRoad(2);
-    if (!this.#road) {
-      return;
-    }
+
     this.runImmigrand();
   }
-  
+
   runImmigrand() {
+    this.#road = this.detectRoad(2);
+    if (!this.#road) {
+      if (this.#checksOfRoadExists++ > CHECK_TO_ROAD_EXISTS) {
+        return this.delete();
+      }
+      this.#waitFor = 100;
+      return;
+    }
     const { x: entryX, y: entryY } = this.map.entryPoint;
     this.#immigrand = this.map.addFigure(new ImmigrantWalker(this.map, entryX, entryY));
   
@@ -44,6 +54,18 @@ class House extends BaseBuilding {
     case 1:
       layer.drawTileSprite(tile, ['housng1a', random % 2 === 0 ? 1 : 2]);
       break;
+    }
+  }
+  
+  tick() {
+    super.tick();
+    
+    if (this.#waitFor > 0) {
+      this.#waitFor--;
+      return;
+    }
+    if (!this.#immigrand && this.#level === 0) {
+      this.runImmigrand();
     }
   }
 }

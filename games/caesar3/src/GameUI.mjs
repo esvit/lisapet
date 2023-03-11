@@ -1,6 +1,7 @@
 import {LAYER_TERRAIN, LAYERS} from './constants.mjs';
 import EventEmitter from '../../../src/EventEmitter.mjs';
 import Map from './Map.mjs';
+import { addClass, removeClass } from './helpers/dom.mjs';
 
 export default
 class GameUI extends EventEmitter {
@@ -21,6 +22,10 @@ class GameUI extends EventEmitter {
     #moneyStat = null;
     #populationStat = null;
     #yearStat = null;
+    #buildButtons = null;
+    #nav = null;
+    #sidebar = null;
+    #ui = null;
 
     #selectedTool = null;
 
@@ -34,8 +39,20 @@ class GameUI extends EventEmitter {
         this.#moneyStat = document.getElementById('moneyStat');
         this.#populationStat = document.getElementById('populationStat');
         this.#yearStat = document.getElementById('yearStat');
+        this.#buildButtons = document.getElementById('build-buttons');
+        this.#nav = document.getElementById('main-navbar');
+        this.#sidebar = document.getElementById('main-sidebar');
+        this.#ui = [this.#nav, this.#sidebar];
 
         this.addEvents();
+    }
+    
+    hideUi() {
+        addClass(this.#ui, 'd-none');
+    }
+    
+    showUi() {
+        removeClass(this.#ui, 'd-none');
     }
 
     bind(map) {
@@ -43,21 +60,6 @@ class GameUI extends EventEmitter {
     }
 
     addEvents() {
-        document.getElementById('newGame').onclick = (e) => {
-            e.preventDefault();
-            const sceneManager = this.#di.get('SceneManager');
-            const mapData = Map.createEmpty(50, 50);
-            sceneManager.currentScene.map = new Map(this.#di, mapData);
-            sceneManager.currentScene.resize();
-        };
-        document.getElementById('loadGame').onclick = async (e) => {
-            e.preventDefault();
-            const resourceManager = this.#di.get('ResourceManager');
-            const sceneManager = this.#di.get('SceneManager');
-            const mapData = await resourceManager.loadJsonByUrl('maps/Brigantium.map.json');
-            sceneManager.currentScene.map = new Map(this.#di, mapData);
-            sceneManager.currentScene.resize();
-        };
         // document.getElementById('loadSaveGame').onclick = async (e) => {
         //     e.preventDefault();
         //     const resourceManager = this.#di.get('ResourceManager');
@@ -66,17 +68,9 @@ class GameUI extends EventEmitter {
         //     sceneManager.currentScene.map = new Map(this.#di, mapData);
         //     sceneManager.currentScene.resize();
         // };
-        document.getElementById('showMissionDialog').onclick = (e) => {
-            e.preventDefault();
-            this.showMissionDialog();
-        };
         document.getElementById('showVideoDialog').onclick = (e) => {
             e.preventDefault();
             this.showVideoDialog();
-        };
-        document.getElementById('showNameDialog').onclick = (e) => {
-            e.preventDefault();
-            this.showDialog('nameDialog');
         };
         document.getElementById('btnOverlay').onclick = (e) => {
             e.preventDefault();

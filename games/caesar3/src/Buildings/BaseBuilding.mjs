@@ -1,7 +1,8 @@
-import {TERRAIN_ROAD} from "../constants.mjs";
+import { TERRAIN_ROAD } from '../constants.mjs';
+import EventEmitter from '../../../../src/EventEmitter.mjs';
 
 export default 
-class BaseBuilding {
+class BaseBuilding extends EventEmitter {
   #map = null;
   
   #x = null;
@@ -9,6 +10,8 @@ class BaseBuilding {
   #y = null;
   
   constructor(map, x, y) {
+    super();
+
     this.#map = map;
     this.#x = x;
     this.#y = y;
@@ -60,5 +63,9 @@ class BaseBuilding {
       }
     }
     return null;
+  }
+
+  delete() {
+    this.emit('delete');
   }
 }

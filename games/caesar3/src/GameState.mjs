@@ -31,6 +31,9 @@ class GameState {
 
   addBuilding(building) {
     this.#buildings.push(building);
+    building.on('delete', () => {
+      this.#buildings = this.#buildings.filter((b) => b !== building);
+    });
     return building;
   }
 
