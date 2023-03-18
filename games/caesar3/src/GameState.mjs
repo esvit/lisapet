@@ -8,6 +8,8 @@ class GameState {
 
   #figures = [];
   
+  #lastAction = null;
+  
   constructor({ initialState }) {
     this.#funds = initialState.funds;
     this.#population = 0;
@@ -50,6 +52,16 @@ class GameState {
     this.#figures.splice(index, 1);
   }
   
+  doAction(action) {
+    this.#lastAction = action;
+    this.#funds -= action.price;
+  }
+  
+  undoAction() {
+    this.#funds += this.#lastAction.price;
+    this.#lastAction = null;
+  }
+  
   tick() {
     for (const building of this.#buildings) {
       building.tick();
@@ -57,5 +69,12 @@ class GameState {
     for (const figure of this.#figures) {
       figure.tick();
     }
+  }
+
+  validate(action) {
+    if (this.#funds >= action.price) {
+      return true;
+    }
+    return 'Недостатньо коштів';
   }
 }

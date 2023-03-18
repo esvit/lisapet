@@ -15,7 +15,7 @@ import {
     TILE_SIZE_1X,
     TERRAIN_NONE,
     LAYER_BUILDINGS,
-    LAYER_FIGURES
+    LAYER_FIGURES, ACTION_CLEAR, EDGE_OCCUPIED
 } from './constants.mjs';
 import GridLayer from './Layers/GridLayer.mjs';
 import { createOffscreenCanvas } from './helpers/offscreenCanvas.mjs';
@@ -28,6 +28,7 @@ import {random} from "./helpers/math.mjs";
 import GameState from "./GameState.mjs";
 import BuildingsLayer from './Layers/BuildingsLayer.mjs';
 import FiguresLayer from './Layers/FiguresLayer.mjs';
+import {getIdByTile} from "./helpers/tileId.mjs";
 
 const TILE_WIDTH = 58;
 const TILE_HEIGHT = 30;
@@ -472,6 +473,9 @@ class Map {
         if (this.#selectedAreaTool) {
             this.#selectedAreaTool.mouseMove(this, [mapX, mapY]);
         }
+        if (this.#selectedAreaTool) {
+            this.#selectedAreaTool.prepareAction(this.#selectedArea);
+        }
 
         // for (const walker of this.walkers.walkers) {
         //     walker.isHovered = false;
@@ -505,5 +509,23 @@ class Map {
     getPath(start, dest) {
         const path = new Path(start, dest);
         return path.buildPath(this, { direction: true });
+    }
+
+    doAction(action) {
+        this.state.doAction(action);
+        console.info(action);
+        switch (action.code) {
+            case ACTION_CLEAR:
+                for (const tile of action.tiles) {
+                    const tileRes = this.#layers[LAYER_TERRAIN].getRandomTerrain(tile.random);
+                    this.set(tile.mapX, tile.mapY, {
+                        tileId: getIdByTile(tileRes),
+                        edgeData: EDGE_OCCUPIED,
+                        minimapInfo: TILE_SIZE_1X,
+                        terrain: TERRAIN_NONE
+                    });
+                }
+                break;
+        }
     }
 }

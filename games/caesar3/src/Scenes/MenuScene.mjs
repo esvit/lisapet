@@ -26,7 +26,8 @@ class MenuScene {
     addEvent(document.getElementById('backToMenu'), 'click', this.showMainMenu.bind(this));
     addEvent(document.getElementById('startNewGame'), 'click', this.onStartNewGameClick.bind(this));
 
-    this.#prescreen.innerText = 'Click on the page to start\nКлацніть по сторінці, щоб почати';
+    window.GameDialogs = GameDialogs;
+    this.#prescreen.innerText = 'Click on the page to start\nКлікніть по сторінці, щоб почати';
   }
   
   stopAudio() {

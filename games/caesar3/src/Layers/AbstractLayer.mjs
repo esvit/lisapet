@@ -68,7 +68,7 @@ class AbstractLayer {
         }
     }
 
-    drawColorTile(mapX, mapY, color) {
+    drawColorTile(mapX, mapY, color, price = null) {
         const { tileHeight, tileWidth } = this.map;
         const halfTileWidth = tileWidth / 2;
         const halfTileHeight = tileHeight / 2;
@@ -85,6 +85,9 @@ class AbstractLayer {
         ctx.lineTo(x, y + tileHeight);
         ctx.lineTo(x + halfTileWidth, y + halfTileHeight);
         ctx.fill();
+        if (price) {
+            this.drawingContext.drawText(price, x, y - halfTileHeight, { font: '20px PT Sans', color: '#d01717', stroke: '#fff' });
+        }
         return [x, y];
     }
 }

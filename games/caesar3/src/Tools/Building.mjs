@@ -1,11 +1,11 @@
 import AbstractTool from './AbstractTool.mjs';
-import { TERRAIN_NOT_CLEAR, TOOLS_BUILDING } from '../constants.mjs';
+import { TERRAIN_NOT_CLEAR, TOOLS_BUILDING, VALID_CELL_COLOR, INVALID_CELL_COLOR } from '../constants.mjs';
 import EngineerPost from '../Buildings/EngineerPost.mjs';
 import { getTileByBuildingId } from '../helpers/buildingTileId.mjs';
 
 export default class BuildingTool extends AbstractTool {
-    constructor(buildingId, price) {
-        super();
+    constructor(map, buildingId, price) {
+        super(map);
         
         this.buildingId = buildingId;
         this.price = price;
@@ -26,7 +26,7 @@ export default class BuildingTool extends AbstractTool {
     drawHoverCell(layer, mapX, mapY, tile) {
         const isValid = !(tile.terrain & TERRAIN_NOT_CLEAR);
         layer.drawTileSprite(tile, getTileByBuildingId(this.buildingId));
-        layer.drawColorTile(mapX, mapY, isValid ? '#3cb04366' : '#ff000066');
+        layer.drawColorTile(mapX, mapY, isValid ? VALID_CELL_COLOR : INVALID_CELL_COLOR);
     }
 
     changeCell(map, x, y, { terrain }) {

@@ -3,46 +3,68 @@ import {
     EDGE_OCCUPIED,
     LAYER_TERRAIN,
     TERRAIN_CLEARABLE,
-    TERRAIN_NONE, TILE_SIZE_1X,
-    TOOLS_SHOVEL
+    TERRAIN_NONE,
+    TILE_SIZE_1X,
+    TOOLS_SHOVEL,
+    VALID_CELL_COLOR,
+    INVALID_CELL_COLOR,
+    ACTION_CLEAR
 } from '../constants.mjs';
-import { getIdByTile } from '../helpers/tileId.mjs';
-import Path from "../Path.mjs";
+import Path from '../Path.mjs';
 
 export default class Shovel extends AbstractTool {
+    constructor(map) {
+        super(map, ACTION_CLEAR);
+    }
+    
     get name() {
         return TOOLS_SHOVEL;
     }
 
+    get price() {
+        return this.tiles.length * 20;
+    }
+
+    isValid(terrain) {
+        return terrain & TERRAIN_CLEARABLE;
+    }
+
     drawPreviewCell(layer, mapX, mapY, tile) {
-        if (tile.terrain & TERRAIN_CLEARABLE) {
+        const isValid = this.isValid(tile.terrain);
+        if (isValid) {
             const tileRes = layer.getRandomTerrain(tile.random);
             layer.drawTileSprite({ ...tile, tileSize: 1 }, tileRes);
+            layer.drawColorTile(mapX, mapY, VALID_CELL_COLOR);
             return true;
+        } else {
+            layer.drawColorTile(mapX, mapY, INVALID_CELL_COLOR);
         }
     }
 
-    changeCell(map, x, y, { terrain, random }) {
-        if (terrain & TERRAIN_CLEARABLE) {
-            const tileRes = map.layers[LAYER_TERRAIN].getRandomTerrain(random);
-            map.set(x, y, {
-                tileId: getIdByTile(tileRes),
-                edgeData: EDGE_OCCUPIED,
-                minimapInfo: TILE_SIZE_1X,
-                terrain: TERRAIN_NONE
-            });
-        }
+    drawHoverCell(layer, mapX, mapY, tile) {
+        const isValid = this.isValid(tile.terrain);
+        layer.drawColorTile(mapX, mapY, isValid ? VALID_CELL_COLOR : INVALID_CELL_COLOR, this.price);
     }
-
-    apply(map, [start, end]) {
-        if (!start || !end) {
+    
+    prepareAction(coords) {
+        if (!coords) {
             return;
         }
+        const [start, end] = coords;
         const area = new Path(start, end);
         const coordinates = area.getCoordinates();
+        const tiles = [];
         for (const [x, y] of coordinates) {
-            const tile = map.get(x, y);
-            this.changeCell(map, x, y, tile);
+            const tile = this.map.get(x, y);
+            if (tile.terrain & TERRAIN_CLEARABLE) {
+                tiles.push(tile);
+            }
         }
+        this.tiles = tiles;
+    }
+
+    apply() {
+        this.map.doAction(this);
+        this.tiles = [];
     }
 }

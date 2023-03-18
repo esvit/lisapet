@@ -1,5 +1,11 @@
 import AbstractTool from './AbstractTool.mjs';
-import { BUILDING_HOUSE_VACANT_LOT, TERRAIN_NOT_CLEAR, TOOLS_HOUSE } from '../constants.mjs';
+import {
+    BUILDING_HOUSE_VACANT_LOT,
+    INVALID_CELL_COLOR, TERRAIN_CLEARABLE,
+    TERRAIN_NOT_CLEAR,
+    TOOLS_HOUSE,
+    VALID_CELL_COLOR
+} from '../constants.mjs';
 import House from '../Buildings/House.mjs';
 import Path from '../Path.mjs';
 import { getTileByBuildingId } from '../helpers/buildingTileId.mjs';
@@ -26,13 +32,30 @@ export default class HouseTool extends AbstractTool {
     drawHoverCell(layer, mapX, mapY, tile) {
         const isValid = this.isValid(tile.terrain);
         layer.drawTileSprite(tile, getTileByBuildingId(BUILDING_HOUSE_VACANT_LOT));
-        layer.drawColorTile(mapX, mapY, isValid ? '#3cb04366' : '#ff000066');
+        layer.drawColorTile(mapX, mapY, isValid ? VALID_CELL_COLOR : INVALID_CELL_COLOR);
     }
 
     changeCell(map, x, y, { terrain }) {
         if (this.isValid(terrain)) {
             map.addBuilding(new House(map, x, y));
         }
+    }
+
+    prepareAction(coords) {
+        if (!coords) {
+            return;
+        }
+        const [start, end] = coords;
+        const area = new Path(start, end);
+        const coordinates = area.getCoordinates();
+        const tiles = [];
+        for (const [x, y] of coordinates) {
+            const tile = this.map.get(x, y);
+            if (tile.terrain & TERRAIN_CLEARABLE) {
+                tiles.push(tile);
+            }
+        }
+        this.tiles = tiles;
     }
 
     apply(map, [start, end]) {

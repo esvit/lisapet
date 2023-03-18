@@ -1,11 +1,16 @@
 import AbstractTool from './AbstractTool.mjs';
 import {
-    BUILDING_HOUSE_VACANT_LOT,
     DIRECTION_EAST,
     DIRECTION_NONE,
-    DIRECTION_NORTH, DIRECTION_SOUTH, DIRECTION_WEST, TERRAIN_NOT_CLEAR, TERRAIN_PATH_ROAD,
+    DIRECTION_NORTH,
+    DIRECTION_SOUTH,
+    DIRECTION_WEST,
+    TERRAIN_NOT_CLEAR,
+    TERRAIN_PATH_ROAD,
     TERRAIN_ROAD,
-    TOOLS_ROAD
+    TOOLS_ROAD,
+    VALID_CELL_COLOR,
+    INVALID_CELL_COLOR,
 } from '../constants.mjs';
 import {pad} from "../helpers/math.mjs";
 import {getIdByTile} from "../helpers/tileId.mjs";
@@ -75,7 +80,7 @@ export default class Road extends AbstractTool {
         const res = 'land2a';
         const tileId = this.getTileByDirection(DIRECTION_NORTH & DIRECTION_EAST & DIRECTION_SOUTH & DIRECTION_WEST);
         layer.drawTileSprite(tile, [res, tileId]);
-        layer.drawColorTile(mapX, mapY, isValid ? '#3cb04366' : '#ff000066');
+        layer.drawColorTile(mapX, mapY, isValid ? VALID_CELL_COLOR : INVALID_CELL_COLOR);
     }
     
     getTileByDirection(direction) {

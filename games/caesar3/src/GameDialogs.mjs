@@ -3,6 +3,23 @@ import Locale from './Locale.mjs';
 
 export default
 class GameDialogs {
+    static showMessage(message, timeout = 10000) {
+        const container = document.getElementById('d-toast-messages');
+        const toast = document.createElement('div');
+        addClass(toast, 'd-toast-message');
+        toast.innerHTML = message;
+        container.appendChild(toast);
+        setTimeout(() => {
+            addClass(toast, 'in');
+        }, 10);
+        setTimeout(() => {
+            addClass(toast, 'out');
+            setTimeout(() => {
+                toast.remove();
+            }, 500);
+        }, timeout);
+    }
+    
     static getField(obj, field) {
         const parts = field.split('.');
         let current = obj;
@@ -63,6 +80,26 @@ class GameDialogs {
             GameDialogs.showDialog('missionDialog', {}, () => {
                 resolve();
             });
+        });
+    }
+
+    static showAngryCaesarDialog() {
+        return new Promise((resolve) => {
+            GameDialogs.showDialog('emp2ndChanceDialog', {}, () => {
+                resolve();
+            });
+            GameDialogs.enableVideo('emp2ndChanceDialog');
+        });
+    }
+
+    static enableVideo(dialogId) {
+        const dialog = document.getElementById(dialogId);
+        const video = dialog.querySelector('video');
+        video.currentTime = 0;
+        video.play();
+        dialog.addEventListener('close', () => {
+            video.currentTime = 0;
+            video.pause();
         });
     }
 }

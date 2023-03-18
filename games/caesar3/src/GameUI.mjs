@@ -173,14 +173,14 @@ class GameUI extends EventEmitter {
         }
         const emit = this.emit.bind(this);
         for (const btn of document.querySelectorAll('[data-tool]')) {
-            btn.onclick = function (e) {
+            btn.onclick = (e) => {
                 e.preventDefault();
-                const toolName = this.getAttribute('data-tool');
+                const toolName = btn.getAttribute('data-tool');
                 let tool;
                 switch (toolName) {
-                case 'road': tool = new Road(); break;
-                case 'house': tool = new House(); break;
-                case 'shovel': tool = new Shovel(); break;
+                case 'road': tool = new Road(this.#map); break;
+                case 'house': tool = new House(this.#map); break;
+                case 'shovel': tool = new Shovel(this.#map); break;
                 }
                 emit('tool', tool);
             };
@@ -248,22 +248,12 @@ class GameUI extends EventEmitter {
             addClass(button, 'btn', 'btn-default', 'btn-block');
             button.innerHTML = title;
             addEventOnce(button, 'click', (e) => {
-                const tool = new Building(item.buildingId, item.price);
+                const tool = new Building(this.#map, item.buildingId, item.price);
                 this.emit('tool', tool);
                 this.toggleBuildings(group, false);
             });
             this.#menuBuildings.appendChild(button);
         }
-    }
-
-    showVideoDialog() {
-        const dialog = this.showDialog('videoDialog');
-        document.getElementById('video').currentTime = 0;
-        document.getElementById('video').play();
-        dialog.addEventListener('close', () => {
-            document.getElementById('video').currentTime = 0;
-            document.getElementById('video').pause();
-        });
     }
 
     showBuildingInfoDialog(info) {

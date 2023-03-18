@@ -2,7 +2,8 @@ import Scene from '../../../../src/Scene.mjs';
 import { moveMapNearBorder, outMapNearBorder } from '../helpers/moveMapNearBorder.mjs';
 import { MOUSE_RIGHT_BUTTON } from '../../../../src/InputManager.mjs';
 import { RESOURCE_ATLASES } from '../constants.mjs';
-import {addEventOnce} from "../helpers/dom.mjs";
+import { addEventOnce } from '../helpers/dom.mjs';
+import GameDialogs from '../GameDialogs.mjs';
 
 export default
 class GameScene extends Scene {
@@ -20,7 +21,8 @@ class GameScene extends Scene {
 
     #gameUI = null;
 
-    #mouseSelectArea = null;
+    #clickPoint = null; // куди клікнули
+    #mouseSelectArea = null; // область вибору
 
     /**
      * Вибраний інструмент будівництва
@@ -34,6 +36,8 @@ class GameScene extends Scene {
     #mapImage = null;
 
     #tickTimer = null;
+
+    #state = null;
 
     constructor({ di, canvas, DrawingContext, ResourceManager, InputManager, GameUI }) {
         super();
@@ -171,8 +175,8 @@ class GameScene extends Scene {
             this.#mouseSelectArea[1] = [mapX, mapY];
             this.#map.selectedAreaTool = this.#selectedTool; // передаємо інструмент в карту, щоб там вже намалювати потрібне
             this.#map.selectedArea = this.#mouseSelectArea;
-        } else if (this.#map.selectedArea) {
-            this.#map.selectedArea[1] = [null, null];
+        } else {
+            this.#map.selectedArea = null
         }
         this.#map.mouseMove(mapX, mapY);
 
@@ -190,10 +194,11 @@ class GameScene extends Scene {
         if (!this.#map) {
             return;
         }
+        const [mapX, mapY] = this.#map.fromCordinates(x, y);
+        this.#clickPoint = [mapX, mapY];
         if (button === MOUSE_RIGHT_BUTTON) { // відловити в кліку це не можна, бо показує контексне меню
             stop();
             if (this.selectedTool === null) {
-                const [mapX, mapY] = this.#map.fromCordinates(x, y);
                 const terrainInfo = this.#map.getTerrainInfo(mapX, mapY)
                 const {tile, edge, minimapInfo, elevation, buildingId} = this.#map.get(mapX, mapY)
 
@@ -223,14 +228,8 @@ class GameScene extends Scene {
             return;
         }
         if (this.#selectedTool && !this.#selectedTool.isDraggable) {
-            const [mapX, mapY] = this.#map.fromCordinates(x, y);
-            this.#mouseSelectArea = [
-                [mapX, mapY],
-                [null, null]
-            ];
             addEventOnce(window, 'mouseup', this.mouseup.bind(this));
         } else if (this.#map.selectedAreaTool) {
-            const [mapX, mapY] = this.#map.fromCordinates(x, y);
             this.#mouseSelectArea = [
                 [mapX, mapY],
                 [null, null]
@@ -244,8 +243,14 @@ class GameScene extends Scene {
             return;
         }
         if (this.#selectedTool) {
-            if (this.#selectedTool.apply(this.#map, this.#mouseSelectArea || this.#map.selectedArea)) {
-                this.selectedTool = null;
+            const isValid = this.#map.state.validate(this.#selectedTool);
+            if (isValid === true) {
+                if (this.#selectedTool.apply(this.#selectedTool.isDraggable ? this.#map.selectedArea : this.#clickPoint)) {
+                    this.selectedTool = null;
+                }
+            } else {
+                GameDialogs.showAngryCaesarDialog();
+                GameDialogs.showMessage(isValid);
             }
         }
         this.#map.selectedArea = null;

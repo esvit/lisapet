@@ -22,6 +22,9 @@ export const DIRECTION_EAST = 2;
 export const DIRECTION_SOUTH = 4;
 export const DIRECTION_WEST = 8;
 
+export const VALID_CELL_COLOR = '#3cb04366';
+export const INVALID_CELL_COLOR = '#ff000066';
+
 const NORTH_ATLAS = 'atlases/north1.atlas';
 const MAIN_ATLAS = 'atlases/main1.atlas';
 const CITIZEN1_ATLAS = 'atlases/citizen1.atlas';
@@ -62,6 +65,9 @@ export const TERRAIN_GATEHOUSE = 0x8000;
 
 export const EDGE_NOT_OCCUPIED = 0x0;
 export const EDGE_OCCUPIED = 0x40;
+
+export const ACTION_CLEAR = 0x0;
+export const ACTION_BUILD = 0x1;
 
 // special
 export const TERRAIN_NONE = 0;
