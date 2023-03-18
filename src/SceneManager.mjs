@@ -8,6 +8,10 @@ class SceneManager {
 
     this.drawingContext.on('draw', this.drawScene.bind(this));
   }
+  
+  get currentScene() {
+    return this.#currentScene;
+  }
 
   async loadScene(sceneDiName, ...args) {
     const scene = this.di.get(sceneDiName);

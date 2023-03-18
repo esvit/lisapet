@@ -136,11 +136,16 @@ class DrawingContext extends EventEmitter {
     }
   }
 
-  drawText(text, x, y, { align, color, size } = {}) {
+  drawText(text, x, y, { align, color, size, font, stroke } = {}) {
     this.ctx.save();
     this.ctx.fillStyle = color || '#000';
-    this.ctx.font = `${size || 20}px "Press Start 2P"`;
+    this.ctx.font = font || `${size || 20}px "Press Start 2P"`;
     this.ctx.textAlign = align || 'left';
+    if (stroke) {
+      this.ctx.strokeStyle = stroke || '#fff';
+      this.ctx.lineWidth = 1;
+      this.ctx.strokeText(text, x, y);
+    }
     this.ctx.fillText(text, x, y);
     this.ctx.restore();
   }
