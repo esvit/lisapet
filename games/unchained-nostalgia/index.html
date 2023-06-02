@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Unchained nostalgia</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body class="slide-1">
+
+<div class="blink press-start">PRESS START</div>
+
+<div class="main-menu">
+
+    <h1>ВіталяГеймдев</h1>
+
+    <p><a target="_blank" href="https://www.youtube.com/@VitalyaGamedev">Youtube-канал @VitalyaGamedev</a></p>
+
+    <br />
+    <p>Ігри</p>
+
+    <ol>
+        <li><a target="_blank" href="https://www.youtube.com/@VitalyaGamedev">Battle-city</a></li>
+    </ol>
+
+</div>
+
+<div class="sky"></div>
+<div class="ground">
+    <div class="ground-front"></div>
+</div>
+
+
+<script src="libgme/libgme.js"></script>
+<script src="index.js"></script>
+<script>
+  const BIRD_SPEED = 6;
+  const SKY_PERCENT = 0.6;
+
+  class Bird {
+    constructor(x, y, mul = 1) {
+      this.x = x;
+      this.y = y || Math.random() * this.groundRect.top;
+      this.vx = mul * BIRD_SPEED;
+      this.vy = Math.random() > 0.5 ? BIRD_SPEED : -BIRD_SPEED;
+      this.sprite = document.createElement('div');
+      this.sprite.classList.add('bird');
+      if (this.vx < 0) {
+        this.sprite.classList.add('flip');
+      }
+      if (this.vy < 0) {
+        this.sprite.classList.add('fly');
+      }
+      document.body.appendChild(this.sprite);
+    }
+
+    fly() {
+      setInterval(() => {
+        this.update();
+      }, 100);
+    }
+
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+      this.sprite.style.left = `${this.x}px`;
+      this.sprite.style.top = `${this.y}px`;
+
+      const {top, left, right, bottom} = this.rect;
+      if (top < 0) {
+        this.vy = BIRD_SPEED;
+        this.sprite.classList.remove('fly');
+      }
+      if (left < 0) {
+        this.vx = BIRD_SPEED;
+        this.sprite.classList.remove('flip');
+      }
+      if (right >= window.innerWidth) {
+        this.vx = -BIRD_SPEED;
+        this.sprite.classList.add('flip');
+      }
+      if (bottom > this.groundRect.top) {
+        this.vy = -BIRD_SPEED;
+        this.sprite.classList.add('fly');
+      }
+    }
+
+    get rect() {
+      return this.sprite.getBoundingClientRect();
+    }
+
+    get groundRect() {
+      return document.querySelector('.ground').getBoundingClientRect();
+    }
+  }
+
+  function start() {
+    // sky animation
+    document.body.classList.add('started');
+
+    // seagulls
+    const bird = new Bird(window.innerWidth / 2, Math.random() * window.innerHeight / 2, 1);
+    const bird2 = new Bird(window.innerWidth / 2 + Math.random() * window.innerWidth / 2, Math.random() * window.innerHeight / 2, -1);
+    bird.fly();
+    bird2.fly();
+
+    // melody
+    const nsfPlayer = createNsfPlayer();
+    nsfPlayer.play('./unchained_melody.nsf');
+
+    // slides
+    let slide = 1;
+    setInterval(() => {
+      const oldSlide = slide;
+      slide++;
+      if (slide > 16) {
+        slide = 1;
+      }
+      document.body.classList.add('slide-' + slide);
+      document.body.classList.remove('slide-' + oldSlide);
+    }, 3000);
+
+    document.body.onclick = null;
+  }
+
+  document.body.onclick = () => start();
+</script>
+<style>
+    :root {
+        --color-1: #2038ec;
+        --color-2: #0070ec;
+        --color-3: #3cbcfc;
+        --color-4: #fc74b4;
+        --color-5: #fc7460;
+        --color-6: #d82800;
+        --color-7: #8000f0;
+        --color-8: #24188c;
+        --color-9: #183c5c;
+        --color-10: #000000;
+        --color-11: #3cbcfc;
+        --ground-offset-y: 0;
+        --bird-offset: 0;
+        --bird-night-offset: -72px;
+        --sky-bg: url('sky.png');
+    }
+
+    body {
+        font-family: 'Press Start 2P', cursive;
+        transition: background-color 1000ms linear;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+    }
+
+    a {
+        color: #ffcf20;
+    }
+
+    .press-start {
+        pointer-events: none;
+        color: #fff;
+        font-size: 24px;
+        text-shadow: 2px 2px 0 #000;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        line-height: 100vh;
+        text-align: center;
+    }
+    .started .press-start {
+        display: none;
+    }
+    .main-menu {
+        display: none;
+        position: fixed;
+        top: 30px;
+        color: #fff;
+        text-shadow: 2px 2px 0 #000;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        text-align: center;
+    }
+    .main-menu ol {
+        display: inline-block;
+    }
+    .started .main-menu {
+        display: block;
+    }
+
+    .sky {
+        flex-grow: 1;
+        background-image: var(--sky-bg);
+        transition: background-image 500ms linear;
+        background-size: 465px 354px;
+        image-rendering: pixelated;
+    }
+
+    .started .sky {
+        animation: sky-animation 120s infinite;
+        -webkit-animation: sky-animation 120s infinite;
+    }
+
+    .ground {
+        width: 100%;
+        aspect-ratio: 500/96;
+        background-size: 100% auto;
+        background-image: url('ground.png');
+        image-rendering: pixelated;
+        background-position: center var(--ground-offset-y);
+        background-repeat: repeat;
+    }
+
+    .slide-1 {
+        background-color: var(--color-1);
+        --ground-offset-y: -1500%;
+    }
+
+    .slide-2 {
+        background-color: var(--color-2);
+        --ground-offset-y: 0;
+    }
+
+    .slide-3 {
+        background-color: var(--color-2);
+        --ground-offset-y: -100%;
+    }
+
+    .slide-4 {
+        background-color: var(--color-3);
+        --ground-offset-y: -200%;
+    }
+
+    .slide-5 {
+        background-color: var(--color-3);
+        --ground-offset-y: -300%;
+    }
+
+    .slide-6 {
+        background-color: var(--color-3);
+        --ground-offset-y: -400%;
+    }
+
+    .slide-7 {
+        background-color: var(--color-4);
+        --ground-offset-y: -500%;
+    }
+
+    .slide-8 {
+        background-color: var(--color-5);
+        --ground-offset-y: -600%;
+    }
+
+    .slide-9 {
+        background-color: var(--color-6);
+        --ground-offset-y: -700%;
+    }
+
+    .slide-10 {
+        background-color: var(--color-7);
+        --ground-offset-y: -800%;
+        --bird-offset: var(--bird-night-offset);
+        --sky-bg: url('stars.png');
+    }
+
+    .slide-11 {
+        background-color: var(--color-7);
+        --ground-offset-y: -900%;
+        --bird-offset: var(--bird-night-offset);
+        --sky-bg: url('stars.png');
+    }
+
+    .slide-12 {
+        background-color: var(--color-8);
+        --ground-offset-y: -1000%;
+        --bird-offset: var(--bird-night-offset);
+        --sky-bg: url('stars.png');
+    }
+
+    .slide-13 {
+        background-color: var(--color-8);
+        --ground-offset-y: -1100%;
+        --bird-offset: var(--bird-night-offset);
+        --sky-bg: url('stars.png');
+    }
+
+    .slide-14 {
+        background-color: var(--color-9);
+        --ground-offset-y: -1200%;
+        --bird-offset: var(--bird-night-offset);
+        --sky-bg: url('stars.png');
+    }
+
+    .slide-15 {
+        background-color: var(--color-10);
+        --ground-offset-y: -1300%;
+        --bird-offset: var(--bird-night-offset);
+        --sky-bg: url('stars.png');
+    }
+
+    .slide-16 {
+        background-color: var(--color-11);
+        --ground-offset-y: -1400%;
+    }
+
+    .bird {
+        width: 72px;
+        height: 24px;
+        background-image: url('./seagull.png');
+        background-size: 144px 72px;
+        image-rendering: pixelated;
+        background-position: var(--bird-offset) 0;
+        background-repeat: no-repeat;
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
+    .bird.fly {
+        transition: none;
+        animation: fly-animation 800ms steps(2, start) infinite;
+        -webkit-animation: fly-animation 800ms steps(2, start) infinite;
+    }
+
+    .bird.flip {
+        transform: scaleX(-1);
+    }
+
+    .blink {
+        animation: blink-animation 1s steps(5, start) infinite;
+        -webkit-animation: blink-animation 1s steps(5, start) infinite;
+    }
+
+    @keyframes fly-animation {
+        to {
+            background-position-y: -21px;
+        }
+        to {
+            background-position-y: -42px;
+        }
+    }
+
+    @-webkit-keyframes fly-animation {
+        to {
+            background-position-y: -21px;
+        }
+        to {
+            background-position-y: -42px;
+        }
+    }
+
+    @keyframes sky-animation {
+        to {
+            background-position-x: 0;
+        }
+        to {
+            background-position-x: -100%;
+        }
+    }
+
+    @-webkit-keyframes sky-animation {
+        to {
+            background-position-x: 0;
+        }
+        to {
+            background-position-x: -100%;
+        }
+    }
+
+    @keyframes blink-animation {
+        to {
+            visibility: hidden;
+        }
+    }
+
+    @-webkit-keyframes blink-animation {
+        to {
+            visibility: hidden;
+        }
+    }
+</style>
+</body>
+</html>
